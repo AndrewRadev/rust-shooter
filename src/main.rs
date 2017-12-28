@@ -5,6 +5,7 @@ use ggez::conf;
 use ggez::event;
 use ggez::{Context, GameResult};
 use ggez::graphics;
+use ggez::timer;
 use std::env;
 use std::path;
 
@@ -12,6 +13,12 @@ use std::path;
 struct MainState {
     text: graphics::Text,
     frames: usize,
+    xoffset: f32,
+    xdir: f32,
+    yoffset: f32,
+    ydir: f32,
+    screen_width: u32,
+    screen_height: u32,
 }
 
 // Then we implement the `ggez:event::EventHandler` trait on it, which
@@ -27,6 +34,12 @@ impl MainState {
         let s = MainState {
             text: text,
             frames: 0,
+            xoffset: 0.0,
+            xdir: 1.0,
+            yoffset: 0.0,
+            ydir: 1.0,
+            screen_width: ctx.conf.window_mode.width,
+            screen_height: ctx.conf.window_mode.height,
         };
         Ok(s)
     }
@@ -34,15 +47,40 @@ impl MainState {
 
 
 impl event::EventHandler for MainState {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        const DESIRED_FPS: u32 = 60;
+
+        while timer::check_update_time(ctx, DESIRED_FPS) {
+            let seconds = 1.0 / (DESIRED_FPS as f32);
+
+            if ((self.text.width() as f32) / 2.0 + 10.0 + self.xoffset) as u32 * 2 <= 0 {
+                self.xdir = 1.0;
+            }
+
+            if ((self.text.height() as f32) / 2.0 + 40.0 + self.yoffset) as u32 <= 0 {
+                self.ydir = 1.0;
+            }
+
+            if ((self.text.width() as f32) / 2.0 + 10.0 + self.xoffset) as u32 * 2 > self.screen_width {
+                self.xdir = -1.0;
+            }
+
+            if ((self.text.height() as f32) / 2.0 + 40.0 + self.yoffset) as u32 > self.screen_height {
+                self.ydir = -1.0;
+            }
+
+            self.xoffset += 100.0 * seconds * self.xdir;
+            self.yoffset += 100.0 * seconds * self.ydir;
+        }
+
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
         // Drawables are drawn from their center.
-        let dest_point = graphics::Point2::new(self.text.width() as f32 / 2.0 + 10.0,
-                                               self.text.height() as f32 / 2.0 + 10.0);
+        let dest_point = graphics::Point2::new(self.text.width() as f32 / 2.0 + 10.0 + self.xoffset,
+                                               self.text.height() as f32 / 2.0 + 10.0 + self.yoffset);
         graphics::draw(ctx, &self.text, dest_point, 0.0)?;
         graphics::present(ctx);
         self.frames += 1;
