@@ -72,8 +72,8 @@ impl MainState {
         // Player starts in bottom-middle of the screen
         let player_bbox_size = 10.0;
         let player_pos = Point2::new(
-            (screen_width as f32) / 2.0 + player_bbox_size,
-            (screen_height as f32) - player_bbox_size
+            (screen_width as f32) / 2.0,
+            (screen_height as f32),
         );
 
         let s = MainState {
@@ -104,15 +104,12 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
 
-        //let pos = world_to_screen_coords(self.screen_width, self.screen_height, ferris.pos);
-        //let image = assets.actor_image(actor);
-        //let drawparams = graphics::DrawParam {
-        //    dest: pos,
-        //    rotation: actor.facing as f32,
-        //    offset: graphics::Point2::new(0.5, 0.5),
-        //    .. Default::default()
-        //};
-        //graphics::draw_ex(ctx, image, drawparams);
+        let drawparams = graphics::DrawParam {
+            dest: self.player.pos,
+            offset: graphics::Point2::new(0.5, 1.0),
+            .. Default::default()
+        };
+        graphics::draw_ex(ctx, &self.assets.ferris_normal_image, drawparams);
 
         graphics::present(ctx);
         Ok(())
