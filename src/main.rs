@@ -56,8 +56,16 @@ impl Player {
     }
 }
 
+#[derive(Debug, Default)]
+struct InputState {
+    //xaxis: f32,
+    //yaxis: f32,
+    fire: bool,
+}
+
 struct MainState {
     assets: Assets,
+    input: InputState,
     player: Player,
     screen_width: u32,
     screen_height: u32,
@@ -78,6 +86,7 @@ impl MainState {
 
         let s = MainState {
             assets: assets,
+            input: InputState::default(),
             player: Player::new(player_pos),
             screen_width: ctx.conf.window_mode.width,
             screen_height: ctx.conf.window_mode.height,
@@ -101,15 +110,50 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
+    fn key_down_event(&mut self,
+                      ctx: &mut Context,
+                      keycode: event::Keycode,
+                      _keymod: event::Mod,
+                      _repeat: bool) {
+        match keycode {
+            event::Keycode::Space => {
+                self.input.fire = true;
+            }
+            event::Keycode::Escape => ctx.quit().unwrap(),
+            _ => (), // Do nothing
+        }
+    }
+
+    fn key_up_event(&mut self,
+                    _ctx: &mut Context,
+                    keycode: event::Keycode,
+                    _keymod: event::Mod,
+                    _repeat: bool) {
+        match keycode {
+            event::Keycode::Space => {
+                self.input.fire = false;
+            }
+            _ => (), // Do nothing
+        }
+    }
+
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
 
-        let drawparams = graphics::DrawParam {
-            dest: self.player.pos,
-            offset: graphics::Point2::new(0.5, 1.0),
-            .. Default::default()
-        };
-        graphics::draw_ex(ctx, &self.assets.ferris_normal_image, drawparams);
+        if self.input.fire {
+            graphics::draw_ex(ctx, &self.assets.ferris_shooting_image, graphics::DrawParam {
+                dest: self.player.pos,
+                offset: Point2::new(0.545, 0.96),
+                .. Default::default()
+            })?;
+        } else {
+            graphics::draw_ex(ctx, &self.assets.ferris_normal_image, graphics::DrawParam {
+                dest: self.player.pos,
+                scale: Point2::new(0.95, 0.95),
+                offset: Point2::new(0.5, 1.0),
+                .. Default::default()
+            })?;
+        }
 
         graphics::present(ctx);
         Ok(())
