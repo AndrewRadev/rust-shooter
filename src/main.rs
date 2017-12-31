@@ -53,6 +53,7 @@ struct MainState {
     assets: Assets,
     input: InputState,
     player: Player,
+    shots: Vec<Shot>,
     screen_width: u32,
     screen_height: u32,
 }
@@ -74,6 +75,7 @@ impl MainState {
             assets: assets,
             input: InputState::default(),
             player: Player::new(player_pos),
+            shots: Vec::new(),
             screen_width: ctx.conf.window_mode.width,
             screen_height: ctx.conf.window_mode.height,
         };
@@ -90,16 +92,29 @@ impl event::EventHandler for MainState {
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let seconds = 1.0 / (DESIRED_FPS as f32);
 
-            self.player.movement(self.input.movement, seconds, self.screen_width as f32);
+            // Update player state
+            self.player.update(self.input.movement, seconds, self.screen_width as f32);
             self.player.time_until_next_shot -= seconds;
             if self.input.fire && self.player.time_until_next_shot < 0.0 {
-                // fire shot
+                let shot_pos = Point2::new(self.player.pos.x - 75.0, self.player.pos.y - 80.0);
+                let shot = Shot::new(shot_pos);
+                self.shots.push(shot);
+
                 let _ = self.assets.shot_sound.play();
+
                 self.player.time_until_next_shot = Player::SHOT_TIMEOUT;
                 self.player.state = PlayerState::Shooting;
             } else if !self.input.fire {
                 self.player.state = PlayerState::Normal;
             }
+
+            // Update shots state
+            for shot in self.shots.iter_mut() {
+                shot.update(seconds);
+            }
+
+            // Remove dead shots
+            self.shots.retain(|shot| shot.pos.y >= 0.0);
         }
 
         Ok(())
@@ -144,6 +159,7 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
 
+        // Draw the player
         match self.player.state {
             PlayerState::Normal => {
                 graphics::draw_ex(ctx, &self.assets.ferris_normal_image, graphics::DrawParam {
@@ -161,6 +177,14 @@ impl event::EventHandler for MainState {
                     .. Default::default()
                 })?;
             },
+        }
+
+        // Draw all the shots
+        for shot in self.shots.iter() {
+            graphics::draw_ex(ctx, &self.assets.shot_image, graphics::DrawParam {
+                dest: shot.pos,
+                .. Default::default()
+            })?;
         }
 
         graphics::present(ctx);
