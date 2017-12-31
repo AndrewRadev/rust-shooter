@@ -8,6 +8,7 @@ use ggez::graphics;
 use ggez::timer;
 use ggez::audio;
 use ggez::graphics::{Vector2, Point2};
+use ggez::nalgebra as na;
 use std::env;
 use std::path;
 
@@ -58,8 +59,7 @@ impl Player {
 
 #[derive(Debug, Default)]
 struct InputState {
-    //xaxis: f32,
-    //yaxis: f32,
+    movement: f32,
     fire: bool,
 }
 
@@ -100,11 +100,13 @@ impl MainState {
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         const DESIRED_FPS: u32 = 60;
+        const PLAYER_SPEED: f32 = 500.0;
 
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let seconds = 1.0 / (DESIRED_FPS as f32);
 
-
+            let new_pos = self.player.pos.x + PLAYER_SPEED * seconds * self.input.movement;
+            self.player.pos.x = na::clamp(new_pos, 0.0, self.screen_width as f32);
         }
 
         Ok(())
@@ -119,6 +121,12 @@ impl event::EventHandler for MainState {
             event::Keycode::Space => {
                 self.input.fire = true;
             }
+            event::Keycode::Left => {
+                self.input.movement = -1.0;
+            }
+            event::Keycode::Right => {
+                self.input.movement = 1.0;
+            }
             event::Keycode::Escape => ctx.quit().unwrap(),
             _ => (), // Do nothing
         }
@@ -132,6 +140,9 @@ impl event::EventHandler for MainState {
         match keycode {
             event::Keycode::Space => {
                 self.input.fire = false;
+            }
+            event::Keycode::Left | event::Keycode::Right => {
+                self.input.movement = 0.0;
             }
             _ => (), // Do nothing
         }
