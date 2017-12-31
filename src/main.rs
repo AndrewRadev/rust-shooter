@@ -42,19 +42,31 @@ impl Assets {
 
 #[derive(Debug)]
 struct Player {
+    state: PlayerState,
     pos: Point2,
     velocity: Vector2,
     bbox_size: f32,
+    time_until_next_shot: f32,
 }
 
 impl Player {
+    const SHOT_TIMEOUT: f32 = 1.0;
+
     fn new(pos: Point2) -> Self {
         Player {
+            state: PlayerState::Normal,
             pos,
             velocity: Vector2::new(0.0, 0.0),
             bbox_size: 10.0,
+            time_until_next_shot: Self::SHOT_TIMEOUT,
         }
     }
+}
+
+#[derive(Debug)]
+enum PlayerState {
+    Normal,
+    Shooting,
 }
 
 #[derive(Debug, Default)]
@@ -107,6 +119,16 @@ impl event::EventHandler for MainState {
 
             let new_pos = self.player.pos.x + PLAYER_SPEED * seconds * self.input.movement;
             self.player.pos.x = na::clamp(new_pos, 0.0, self.screen_width as f32);
+
+            self.player.time_until_next_shot -= seconds;
+            if self.input.fire && self.player.time_until_next_shot < 0.0 {
+                // fire shot
+                let _ = self.assets.shot_sound.play();
+                self.player.time_until_next_shot = Player::SHOT_TIMEOUT;
+                self.player.state = PlayerState::Shooting;
+            } else if !self.input.fire {
+                self.player.state = PlayerState::Normal;
+            }
         }
 
         Ok(())
@@ -151,19 +173,23 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
 
-        if self.input.fire {
-            graphics::draw_ex(ctx, &self.assets.ferris_shooting_image, graphics::DrawParam {
-                dest: self.player.pos,
-                offset: Point2::new(0.545, 0.96),
-                .. Default::default()
-            })?;
-        } else {
-            graphics::draw_ex(ctx, &self.assets.ferris_normal_image, graphics::DrawParam {
-                dest: self.player.pos,
-                scale: Point2::new(0.95, 0.95),
-                offset: Point2::new(0.5, 1.0),
-                .. Default::default()
-            })?;
+        match self.player.state {
+            PlayerState::Normal => {
+                graphics::draw_ex(ctx, &self.assets.ferris_normal_image, graphics::DrawParam {
+                    dest: self.player.pos,
+                    scale: Point2::new(0.95, 0.95),
+                    offset: Point2::new(0.5, 1.0),
+                    .. Default::default()
+                })?;
+            },
+
+            PlayerState::Shooting => {
+                graphics::draw_ex(ctx, &self.assets.ferris_shooting_image, graphics::DrawParam {
+                    dest: self.player.pos,
+                    offset: Point2::new(0.545, 0.96),
+                    .. Default::default()
+                })?;
+            },
         }
 
         graphics::present(ctx);
