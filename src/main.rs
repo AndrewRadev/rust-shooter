@@ -8,7 +8,10 @@ use ggez::graphics;
 use ggez::timer;
 use ggez::audio;
 use ggez::graphics::{Vector2, Point2};
-use ggez::nalgebra as na;
+
+extern crate shooter;
+use shooter::entities::{Player, PlayerState, Shot};
+
 use std::env;
 use std::path;
 
@@ -38,35 +41,6 @@ impl Assets {
             shot_sound, hit_sound,
         })
     }
-}
-
-#[derive(Debug)]
-struct Player {
-    state: PlayerState,
-    pos: Point2,
-    velocity: Vector2,
-    bbox_size: f32,
-    time_until_next_shot: f32,
-}
-
-impl Player {
-    const SHOT_TIMEOUT: f32 = 1.0;
-
-    fn new(pos: Point2) -> Self {
-        Player {
-            state: PlayerState::Normal,
-            pos,
-            velocity: Vector2::new(0.0, 0.0),
-            bbox_size: 10.0,
-            time_until_next_shot: Self::SHOT_TIMEOUT,
-        }
-    }
-}
-
-#[derive(Debug)]
-enum PlayerState {
-    Normal,
-    Shooting,
 }
 
 #[derive(Debug, Default)]
@@ -112,14 +86,11 @@ impl MainState {
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         const DESIRED_FPS: u32 = 60;
-        const PLAYER_SPEED: f32 = 500.0;
 
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let seconds = 1.0 / (DESIRED_FPS as f32);
 
-            let new_pos = self.player.pos.x + PLAYER_SPEED * seconds * self.input.movement;
-            self.player.pos.x = na::clamp(new_pos, 0.0, self.screen_width as f32);
-
+            self.player.movement(self.input.movement, seconds, self.screen_width as f32);
             self.player.time_until_next_shot -= seconds;
             if self.input.fire && self.player.time_until_next_shot < 0.0 {
                 // fire shot
