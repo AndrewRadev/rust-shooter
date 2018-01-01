@@ -1,5 +1,8 @@
-use ggez::graphics::{Vector2, Point2};
+use ggez::{Context, GameResult};
+use ggez::graphics::{self, Vector2, Point2};
 use ggez::nalgebra as na;
+
+use assets::Assets;
 
 #[derive(Debug)]
 pub enum PlayerState {
@@ -33,6 +36,29 @@ impl Player {
     pub fn update(&mut self, amount: f32, seconds: f32, max_right: f32) {
         let new_pos = self.pos.x + Self::SPEED * seconds * amount;
         self.pos.x = na::clamp(new_pos, 0.0, max_right);
+    }
+
+    pub fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
+        match self.state {
+            PlayerState::Normal => {
+                graphics::draw_ex(ctx, &assets.ferris_normal_image, graphics::DrawParam {
+                    dest: self.pos,
+                    scale: Point2::new(0.95, 0.95),
+                    offset: Point2::new(0.5, 1.0),
+                    .. Default::default()
+                })?;
+            },
+
+            PlayerState::Shooting => {
+                graphics::draw_ex(ctx, &assets.ferris_shooting_image, graphics::DrawParam {
+                    dest: self.pos,
+                    offset: Point2::new(0.545, 0.96),
+                    .. Default::default()
+                })?;
+            },
+        }
+
+        Ok(())
     }
 }
 

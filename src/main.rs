@@ -4,44 +4,15 @@ extern crate ggez;
 use ggez::conf;
 use ggez::event;
 use ggez::{Context, GameResult};
-use ggez::graphics;
 use ggez::timer;
-use ggez::audio;
-use ggez::graphics::{Vector2, Point2};
+use ggez::graphics::{self, Point2};
 
 extern crate shooter;
 use shooter::entities::{Player, PlayerState, Shot};
+use shooter::assets::Assets;
 
 use std::env;
 use std::path;
-
-struct Assets {
-    ferris_normal_image: graphics::Image,
-    ferris_shooting_image: graphics::Image,
-    shot_image: graphics::Image,
-    font: graphics::Font,
-    shot_sound: audio::Source,
-    hit_sound: audio::Source,
-}
-
-impl Assets {
-    fn new(ctx: &mut Context) -> GameResult<Assets> {
-        let ferris_normal_image = graphics::Image::new(ctx, "/ferris-normal.png")?;
-        let ferris_shooting_image = graphics::Image::new(ctx, "/ferris-shooting.png")?;
-        let shot_image = graphics::Image::new(ctx, "/shot.png")?;
-
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 18)?;
-
-        let shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
-        let hit_sound = audio::Source::new(ctx, "/boom.ogg")?;
-
-        Ok(Assets {
-            ferris_normal_image, ferris_shooting_image,
-            shot_image, font,
-            shot_sound, hit_sound,
-        })
-    }
-}
 
 #[derive(Debug, Default)]
 struct InputState {
@@ -159,25 +130,7 @@ impl event::EventHandler for MainState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
 
-        // Draw the player
-        match self.player.state {
-            PlayerState::Normal => {
-                graphics::draw_ex(ctx, &self.assets.ferris_normal_image, graphics::DrawParam {
-                    dest: self.player.pos,
-                    scale: Point2::new(0.95, 0.95),
-                    offset: Point2::new(0.5, 1.0),
-                    .. Default::default()
-                })?;
-            },
-
-            PlayerState::Shooting => {
-                graphics::draw_ex(ctx, &self.assets.ferris_shooting_image, graphics::DrawParam {
-                    dest: self.player.pos,
-                    offset: Point2::new(0.545, 0.96),
-                    .. Default::default()
-                })?;
-            },
-        }
+        self.player.draw(ctx, &self.assets)?;
 
         // Draw all the shots
         for shot in self.shots.iter() {
