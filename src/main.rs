@@ -7,8 +7,11 @@ use ggez::{Context, GameResult};
 use ggez::timer;
 use ggez::graphics::{self, Point2};
 
+extern crate rand;
+use rand::Rng;
+
 extern crate shooter;
-use shooter::entities::{Player, PlayerState, Shot};
+use shooter::entities::{Player, PlayerState, Shot, Enemy};
 use shooter::assets::Assets;
 
 use std::env;
@@ -25,6 +28,7 @@ struct MainState {
     input: InputState,
     player: Player,
     shots: Vec<Shot>,
+    enemies: Vec<Enemy>,
     screen_width: u32,
     screen_height: u32,
 }
@@ -42,11 +46,16 @@ impl MainState {
             (screen_height as f32),
         );
 
+        let mut rng = rand::thread_rng();
+        let random_point = Point2::new(rng.gen_range(0.0, ctx.conf.window_mode.width as f32), 0.0);
+        let first_enemy = Enemy::new("C++", random_point, ctx, &assets)?;
+
         let s = MainState {
             assets: assets,
             input: InputState::default(),
             player: Player::new(player_pos),
             shots: Vec::new(),
+            enemies: vec![first_enemy],
             screen_width: ctx.conf.window_mode.width,
             screen_height: ctx.conf.window_mode.height,
         };
@@ -79,13 +88,14 @@ impl event::EventHandler for MainState {
                 self.player.state = PlayerState::Normal;
             }
 
-            // Update shots state
             for shot in self.shots.iter_mut() {
                 shot.update(seconds);
             }
-
-            // Remove dead shots
             self.shots.retain(|shot| shot.pos.y >= 0.0);
+
+            for enemy in self.enemies.iter_mut() {
+                enemy.update(seconds);
+            }
         }
 
         Ok(())
@@ -132,12 +142,12 @@ impl event::EventHandler for MainState {
 
         self.player.draw(ctx, &self.assets)?;
 
-        // Draw all the shots
-        for shot in self.shots.iter() {
-            graphics::draw_ex(ctx, &self.assets.shot_image, graphics::DrawParam {
-                dest: shot.pos,
-                .. Default::default()
-            })?;
+        for shot in self.shots.iter_mut() {
+            shot.draw(ctx, &self.assets);
+        }
+
+        for enemy in self.enemies.iter_mut() {
+            enemy.draw(ctx);
         }
 
         graphics::present(ctx);

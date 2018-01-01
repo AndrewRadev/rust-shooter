@@ -71,10 +71,48 @@ pub struct Shot {
 
 impl Shot {
     pub fn new(pos: Point2) -> Self {
-        Shot { pos, velocity: Vector2::new(0.0, -500.0), bbox_size: 10.0 }
+        Shot {
+            pos,
+            velocity: Vector2::new(0.0, -500.0),
+            bbox_size: 10.0,
+        }
     }
 
     pub fn update(&mut self, seconds: f32) {
         self.pos += self.velocity * seconds;
+    }
+
+    pub fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
+        graphics::draw_ex(ctx, &assets.shot_image, graphics::DrawParam {
+            dest: self.pos,
+            .. Default::default()
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct Enemy {
+    pub text: graphics::Text,
+    pub pos: Point2,
+    velocity: Vector2,
+}
+
+impl Enemy {
+    pub fn new(text: &str, pos: Point2, ctx: &mut Context, assets: &Assets) -> GameResult<Self> {
+        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 24)?;
+        let text = graphics::Text::new(ctx, text, &font)?;
+
+        Ok(Enemy {
+            pos, text,
+            velocity: Vector2::new(0.0, 100.0),
+        })
+    }
+
+    pub fn update(&mut self, seconds: f32) {
+        self.pos += self.velocity * seconds;
+    }
+
+    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        graphics::draw(ctx, &self.text, self.pos, 0.0)
     }
 }

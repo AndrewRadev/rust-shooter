@@ -5,3 +5,4 @@ authors = ["Andrew"]
 
 [dependencies]
 ggez = { git = "https://github.com/ggez/ggez" }
+rand = "*"
