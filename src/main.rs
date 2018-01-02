@@ -104,6 +104,7 @@ impl event::EventHandler for MainState {
 
                 if enemy.pos.y >= self.screen_height as f32 {
                     self.game_over = true;
+                    let _ = self.assets.boom_sound.play();
                 }
             }
         }
