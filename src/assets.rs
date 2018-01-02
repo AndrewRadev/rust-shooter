@@ -6,7 +6,6 @@ pub struct Assets {
     pub ferris_normal_image: graphics::Image,
     pub ferris_shooting_image: graphics::Image,
     pub shot_image: graphics::Image,
-    pub font: graphics::Font,
     pub shot_sound: audio::Source,
     pub boom_sound: audio::Source,
 }
@@ -17,14 +16,11 @@ impl Assets {
         let ferris_shooting_image = graphics::Image::new(ctx, "/ferris-shooting.png")?;
         let shot_image = graphics::Image::new(ctx, "/shot.png")?;
 
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 18)?;
-
         let shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
         let boom_sound = audio::Source::new(ctx, "/boom.ogg")?;
 
         Ok(Assets {
-            ferris_normal_image, ferris_shooting_image,
-            shot_image, font,
+            ferris_normal_image, ferris_shooting_image, shot_image,
             shot_sound, boom_sound,
         })
     }

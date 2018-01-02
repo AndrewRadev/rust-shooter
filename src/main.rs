@@ -30,26 +30,28 @@ struct MainState {
     player: Player,
     shots: Vec<Shot>,
     enemies: Vec<Enemy>,
+    time_until_next_enemy: f32,
     screen_width: u32,
     screen_height: u32,
 }
 
 impl MainState {
+    const ENEMIES: [&'static str; 9] = [
+        "Segfaults", "C++", "Undefined Behaviour",
+        "NULL", "Inefficiency", "ASCII", "Bloat",
+        "Goto", "Data Races"
+    ];
+
     fn new(ctx: &mut Context) -> GameResult<MainState> {
         let assets = Assets::new(ctx)?;
         let screen_width = ctx.conf.window_mode.width;
         let screen_height = ctx.conf.window_mode.height;
 
         // Player starts in bottom-middle of the screen
-        let player_bbox_size = 10.0;
         let player_pos = Point2::new(
             (screen_width as f32) / 2.0,
             (screen_height as f32),
         );
-
-        let mut rng = rand::thread_rng();
-        let random_point = Point2::new(rng.gen_range(0.0, ctx.conf.window_mode.width as f32), 0.0);
-        let first_enemy = Enemy::new("C++", random_point, ctx, &assets)?;
 
         let s = MainState {
             game_over: false,
@@ -57,7 +59,8 @@ impl MainState {
             input: InputState::default(),
             player: Player::new(player_pos),
             shots: Vec::new(),
-            enemies: vec![first_enemy],
+            enemies: Vec::new(),
+            time_until_next_enemy: 1.0,
             screen_width: ctx.conf.window_mode.width,
             screen_height: ctx.conf.window_mode.height,
         };
@@ -67,12 +70,8 @@ impl MainState {
 
     fn handle_collisions(&mut self) {
         for enemy in &mut self.enemies {
-            let left   = enemy.pos.x - enemy.text.width()  as f32 / 2.0;
-            let right  = enemy.pos.x + enemy.text.width()  as f32 / 2.0;
-            let bottom = enemy.pos.y + enemy.text.height() as f32 / 2.0;
-
             for shot in &mut self.shots {
-                if shot.pos.x > left && shot.pos.x < right && shot.pos.y < bottom {
+                if enemy.bounding_rect().contains(shot.pos) {
                     shot.is_alive = false;
                     enemy.is_alive = false;
                     let _ = self.assets.boom_sound.play();
@@ -93,6 +92,16 @@ impl event::EventHandler for MainState {
 
         while timer::check_update_time(ctx, DESIRED_FPS) {
             let seconds = 1.0 / (DESIRED_FPS as f32);
+
+            // Spawn enemies
+            self.time_until_next_enemy -= seconds;
+            if self.time_until_next_enemy <= 0.0 {
+                let mut rng = rand::thread_rng();
+                let random_point = Point2::new(rng.gen_range(20.0, ctx.conf.window_mode.width as f32 - 20.0), 0.0);
+                let random_text = Self::ENEMIES[rng.gen_range(0, Self::ENEMIES.len())];
+                self.enemies.push(Enemy::new(random_text, random_point, ctx)?);
+                self.time_until_next_enemy = rng.gen_range(1.0, 3.0);
+            }
 
             // Update player state
             self.player.update(self.input.movement, seconds, self.screen_width as f32);
@@ -188,11 +197,19 @@ impl event::EventHandler for MainState {
         self.player.draw(ctx, &self.assets)?;
 
         for shot in self.shots.iter_mut() {
-            shot.draw(ctx, &self.assets);
+            shot.draw(ctx, &self.assets)?;
         }
 
         for enemy in self.enemies.iter_mut() {
-            enemy.draw(ctx);
+            enemy.draw(ctx)?;
+        }
+
+        if std::env::var("DEBUG").is_ok() {
+            for enemy in &mut self.enemies {
+                graphics::set_color(ctx, graphics::Color::new(1.0, 0.0, 0.0, 1.0))?;
+                graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), enemy.bounding_rect())?;
+                graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
+            }
         }
 
         graphics::present(ctx);

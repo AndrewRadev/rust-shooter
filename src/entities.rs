@@ -16,7 +16,6 @@ pub struct Player {
     pub pos: Point2,
     pub time_until_next_shot: f32,
     velocity: Vector2,
-    bbox_size: f32,
 }
 
 impl Player {
@@ -28,7 +27,6 @@ impl Player {
             state: PlayerState::Normal,
             pos,
             velocity: Vector2::new(0.0, 0.0),
-            bbox_size: 10.0,
             time_until_next_shot: Self::SHOT_TIMEOUT,
         }
     }
@@ -67,7 +65,6 @@ pub struct Shot {
     pub pos: Point2,
     pub is_alive: bool,
     velocity: Vector2,
-    bbox_size: f32,
 }
 
 impl Shot {
@@ -76,7 +73,6 @@ impl Shot {
             pos,
             is_alive: true,
             velocity: Vector2::new(0.0, -500.0),
-            bbox_size: 10.0,
         }
     }
 
@@ -101,7 +97,7 @@ pub struct Enemy {
 }
 
 impl Enemy {
-    pub fn new(text: &str, pos: Point2, ctx: &mut Context, assets: &Assets) -> GameResult<Self> {
+    pub fn new(text: &str, pos: Point2, ctx: &mut Context) -> GameResult<Self> {
         let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 24)?;
         let text = graphics::Text::new(ctx, text, &font)?;
 
@@ -117,6 +113,19 @@ impl Enemy {
     }
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::draw(ctx, &self.text, self.pos, 0.0)
+        graphics::draw_ex(ctx, &self.text, graphics::DrawParam {
+            dest: self.pos,
+            offset: Point2::new(0.5, 0.5),
+            .. Default::default()
+        })
+    }
+
+    pub fn bounding_rect(&self) -> graphics::Rect {
+        let left   = self.pos.x - self.text.width()  as f32 / 2.0;
+        let right  = self.pos.x + self.text.width()  as f32 / 2.0;
+        let top    = self.pos.y - self.text.height() as f32 / 2.0;
+        let bottom = self.pos.y + self.text.height() as f32 / 2.0;
+
+        graphics::Rect::new(left, top, right - left, bottom - top)
     }
 }
