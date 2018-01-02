@@ -153,15 +153,9 @@ impl event::EventHandler for MainState {
                       _keymod: event::Mod,
                       _repeat: bool) {
         match keycode {
-            event::Keycode::Space => {
-                self.input.fire = true;
-            }
-            event::Keycode::Left => {
-                self.input.movement = -1.0;
-            }
-            event::Keycode::Right => {
-                self.input.movement = 1.0;
-            }
+            event::Keycode::Space => self.input.fire = true,
+            event::Keycode::Left => self.input.movement = -1.0,
+            event::Keycode::Right => self.input.movement = 1.0,
             event::Keycode::Escape => ctx.quit().unwrap(),
             _ => (), // Do nothing
         }
@@ -173,12 +167,8 @@ impl event::EventHandler for MainState {
                     _keymod: event::Mod,
                     _repeat: bool) {
         match keycode {
-            event::Keycode::Space => {
-                self.input.fire = false;
-            }
-            event::Keycode::Left | event::Keycode::Right => {
-                self.input.movement = 0.0;
-            }
+            event::Keycode::Space => self.input.fire = false,
+            event::Keycode::Left | event::Keycode::Right => self.input.movement = 0.0,
             _ => (), // Do nothing
         }
     }
