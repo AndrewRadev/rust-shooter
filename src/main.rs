@@ -25,6 +25,8 @@ struct InputState {
 
 struct MainState {
     game_over: bool,
+    killed_by: String,
+    score: u32,
     assets: Assets,
     input: InputState,
     player: Player,
@@ -36,9 +38,9 @@ struct MainState {
 }
 
 impl MainState {
-    const ENEMIES: [&'static str; 9] = [
+    const ENEMIES: [&'static str; 8] = [
         "Segfaults", "C++", "Undefined Behaviour",
-        "NULL", "Inefficiency", "ASCII", "Bloat",
+        "NULL", "Inefficiency", "Bloat",
         "Goto", "Data Races"
     ];
 
@@ -55,6 +57,8 @@ impl MainState {
 
         let s = MainState {
             game_over: false,
+            score: 0,
+            killed_by: String::new(),
             assets: assets,
             input: InputState::default(),
             player: Player::new(player_pos),
@@ -74,6 +78,7 @@ impl MainState {
                 if enemy.bounding_rect().contains(shot.pos) {
                     shot.is_alive = false;
                     enemy.is_alive = false;
+                    self.score += 1;
                     let _ = self.assets.boom_sound.play();
                 }
             }
@@ -128,6 +133,7 @@ impl event::EventHandler for MainState {
 
                 if enemy.pos.y >= self.screen_height as f32 {
                     self.game_over = true;
+                    self.killed_by = String::from(enemy.text.contents());
                     let _ = self.assets.boom_sound.play();
                 }
             }
@@ -181,8 +187,8 @@ impl event::EventHandler for MainState {
         graphics::clear(ctx);
 
         if self.game_over {
-            let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 48)?;
-            let text = graphics::Text::new(ctx, "GAME OVER", &font)?;
+            let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 24)?;
+            let text = graphics::Text::new(ctx, &format!("Killed by {}. Score: {}", self.killed_by, self.score), &font)?;
 
             let center = Point2::new(self.screen_width as f32 / 2.0, self.screen_height as f32 / 2.0);
             graphics::draw_ex(ctx, &text, graphics::DrawParam {
