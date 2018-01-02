@@ -65,6 +65,7 @@ impl Player {
 #[derive(Debug)]
 pub struct Shot {
     pub pos: Point2,
+    pub is_alive: bool,
     velocity: Vector2,
     bbox_size: f32,
 }
@@ -73,6 +74,7 @@ impl Shot {
     pub fn new(pos: Point2) -> Self {
         Shot {
             pos,
+            is_alive: true,
             velocity: Vector2::new(0.0, -500.0),
             bbox_size: 10.0,
         }
@@ -94,6 +96,7 @@ impl Shot {
 pub struct Enemy {
     pub text: graphics::Text,
     pub pos: Point2,
+    pub is_alive: bool,
     velocity: Vector2,
 }
 
@@ -104,6 +107,7 @@ impl Enemy {
 
         Ok(Enemy {
             pos, text,
+            is_alive: true,
             velocity: Vector2::new(0.0, 100.0),
         })
     }

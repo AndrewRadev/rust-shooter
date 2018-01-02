@@ -64,6 +64,22 @@ impl MainState {
 
         Ok(s)
     }
+
+    fn handle_collisions(&mut self) {
+        for enemy in &mut self.enemies {
+            let left   = enemy.pos.x - enemy.text.width()  as f32 / 2.0;
+            let right  = enemy.pos.x + enemy.text.width()  as f32 / 2.0;
+            let bottom = enemy.pos.y + enemy.text.height() as f32 / 2.0;
+
+            for shot in &mut self.shots {
+                if shot.pos.x > left && shot.pos.x < right && shot.pos.y < bottom {
+                    shot.is_alive = false;
+                    enemy.is_alive = false;
+                    let _ = self.assets.boom_sound.play();
+                }
+            }
+        }
+    }
 }
 
 
@@ -97,7 +113,6 @@ impl event::EventHandler for MainState {
             for shot in self.shots.iter_mut() {
                 shot.update(seconds);
             }
-            self.shots.retain(|shot| shot.pos.y >= 0.0);
 
             for enemy in self.enemies.iter_mut() {
                 enemy.update(seconds);
@@ -107,6 +122,11 @@ impl event::EventHandler for MainState {
                     let _ = self.assets.boom_sound.play();
                 }
             }
+
+            self.handle_collisions();
+
+            self.shots.retain(|shot| shot.is_alive && shot.pos.y >= 0.0);
+            self.enemies.retain(|enemy| enemy.is_alive);
         }
 
         Ok(())
