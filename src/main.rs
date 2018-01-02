@@ -24,6 +24,7 @@ struct InputState {
 }
 
 struct MainState {
+    game_over: bool,
     assets: Assets,
     input: InputState,
     player: Player,
@@ -51,6 +52,7 @@ impl MainState {
         let first_enemy = Enemy::new("C++", random_point, ctx, &assets)?;
 
         let s = MainState {
+            game_over: false,
             assets: assets,
             input: InputState::default(),
             player: Player::new(player_pos),
@@ -67,6 +69,10 @@ impl MainState {
 
 impl event::EventHandler for MainState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        if self.game_over {
+            return Ok(());
+        }
+
         const DESIRED_FPS: u32 = 60;
 
         while timer::check_update_time(ctx, DESIRED_FPS) {
@@ -95,6 +101,10 @@ impl event::EventHandler for MainState {
 
             for enemy in self.enemies.iter_mut() {
                 enemy.update(seconds);
+
+                if enemy.pos.y >= self.screen_height as f32 {
+                    self.game_over = true;
+                }
             }
         }
 
@@ -139,6 +149,20 @@ impl event::EventHandler for MainState {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx);
+
+        if self.game_over {
+            let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 48)?;
+            let text = graphics::Text::new(ctx, "GAME OVER", &font)?;
+
+            let center = Point2::new(self.screen_width as f32 / 2.0, self.screen_height as f32 / 2.0);
+            graphics::draw_ex(ctx, &text, graphics::DrawParam {
+                dest: center,
+                offset: Point2::new(0.5, 0.5),
+                .. Default::default()
+            })?;
+            graphics::present(ctx);
+            return Ok(())
+        }
 
         self.player.draw(ctx, &self.assets)?;
 
