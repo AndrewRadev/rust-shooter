@@ -38,10 +38,10 @@ struct MainState {
 }
 
 impl MainState {
-    const ENEMIES: [&'static str; 8] = [
-        "Segfaults", "C++", "Undefined Behaviour",
-        "NULL", "Inefficiency", "Bloat",
-        "Goto", "Data Races"
+    const ENEMIES: [&'static str; 7] = [
+        "Segfaults", "Undefined Behaviour",
+        "NULLs", "Inefficiencies", "Bloat",
+        "Unnecessary Heap Allocations", "Data Races"
     ];
 
     fn new(ctx: &mut Context) -> GameResult<MainState> {
