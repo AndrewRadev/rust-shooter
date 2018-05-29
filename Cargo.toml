@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["Andrew"]
 
 [dependencies]
-ggez = { git = "https://github.com/ggez/ggez" }
+ggez = "0.4.2"
 rand = "*"
