@@ -1,9 +1,9 @@
 //! Basic hello world example.
 
 extern crate ggez;
-use ggez::conf;
+use ggez::conf::{WindowMode};
+use ggez::{Context, ContextBuilder, GameResult};
 use ggez::event;
-use ggez::{Context, GameResult};
 use ggez::timer;
 use ggez::graphics::{self, Point2};
 
@@ -52,7 +52,7 @@ impl MainState {
         // Player starts in bottom-middle of the screen
         let player_pos = Point2::new(
             (screen_width as f32) / 2.0,
-            (screen_height as f32),
+            screen_height as f32,
         );
 
         let s = MainState {
@@ -214,8 +214,13 @@ impl event::EventHandler for MainState {
 }
 
 pub fn main() {
-    let c = conf::Conf::new();
-    let ctx = &mut Context::load_from_conf("shooter", "ggez", c).unwrap();
+    let ctx = &mut ContextBuilder::new("shooter", "Andrew").
+        window_mode(WindowMode {
+            min_width: 1024,
+            min_height: 768,
+            ..Default::default()
+        }).
+        build().unwrap();
 
     // We add the CARGO_MANIFEST_DIR/resources do the filesystems paths so
     // we we look in the cargo project for files.
