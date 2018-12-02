@@ -97,14 +97,14 @@ pub struct Enemy {
 }
 
 impl Enemy {
-    pub fn new(text: &str, pos: Point2, ctx: &mut Context) -> GameResult<Self> {
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 24)?;
+    pub fn new(text: &str, pos: Point2, speed: f32, ctx: &mut Context) -> GameResult<Self> {
+        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 16)?;
         let text = graphics::Text::new(ctx, text, &font)?;
 
         Ok(Enemy {
             pos, text,
             is_alive: true,
-            velocity: Vector2::new(0.0, 100.0),
+            velocity: Vector2::new(0.0, speed),
         })
     }
 

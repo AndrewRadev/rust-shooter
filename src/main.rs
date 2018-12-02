@@ -1,5 +1,3 @@
-//! Basic hello world example.
-
 extern crate ggez;
 use ggez::conf::{WindowMode};
 use ggez::{Context, ContextBuilder, GameResult};
@@ -102,10 +100,11 @@ impl event::EventHandler for MainState {
             self.time_until_next_enemy -= seconds;
             if self.time_until_next_enemy <= 0.0 {
                 let mut rng = rand::thread_rng();
-                let random_point = Point2::new(rng.gen_range(20.0, ctx.conf.window_mode.width as f32 - 20.0), 0.0);
+                let random_point = Point2::new(rng.gen_range(40.0, ctx.conf.window_mode.width as f32 - 40.0), 0.0);
                 let random_text = Self::ENEMIES[rng.gen_range(0, Self::ENEMIES.len())];
-                self.enemies.push(Enemy::new(random_text, random_point, ctx)?);
-                self.time_until_next_enemy = rng.gen_range(1.0, 3.0);
+                let random_speed = rng.gen_range(50.0, 200.0);
+                self.enemies.push(Enemy::new(random_text, random_point, random_speed, ctx)?);
+                self.time_until_next_enemy = rng.gen_range(0.5, 1.8);
             }
 
             // Update player state
