@@ -5,6 +5,7 @@ use ggez::{Context, GameResult};
 use ggez::graphics::Point2;
 use ggez::nalgebra as na;
 use shooter::entities::*;
+use shooter::assets::Sprite;
 
 #[derive(Debug)]
 struct MockSprite {

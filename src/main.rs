@@ -9,8 +9,8 @@ extern crate rand;
 use rand::Rng;
 
 extern crate shooter;
-use shooter::entities::{Player, PlayerState, Shot, Enemy, TextSprite};
-use shooter::assets::Assets;
+use shooter::entities::{Player, PlayerState, Shot, Enemy};
+use shooter::assets::{Assets, TextSprite};
 
 use std::env;
 use std::path;
