@@ -90,22 +90,58 @@ impl Shot {
 
 #[derive(Debug)]
 pub struct Enemy {
-    pub text: graphics::Text,
     pub pos: Point2,
     pub is_alive: bool,
+    label: String,
     velocity: Vector2,
+    sprite: Box<dyn Sprite>,
+}
+
+pub trait Sprite: std::fmt::Debug {
+    fn draw(&mut self, center: Point2, ctx: &mut Context) -> GameResult<()>;
+    fn width(&self) -> u32;
+    fn height(&self) -> u32;
+}
+
+#[derive(Debug)]
+pub struct TextSprite {
+    text: graphics::Text,
+}
+
+impl TextSprite {
+    pub fn new(label: &str, ctx: &mut Context) -> GameResult<TextSprite> {
+        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 16)?;
+        let text = graphics::Text::new(ctx, label, &font)?;
+        Ok(TextSprite { text })
+    }
+}
+
+impl Sprite for TextSprite {
+    fn draw(&mut self, center: Point2, ctx: &mut Context) -> GameResult<()> {
+        graphics::draw_ex(ctx, &self.text, graphics::DrawParam {
+            dest: center,
+            offset: Point2::new(0.5, 0.5),
+            .. Default::default()
+        })
+    }
+
+    fn width(&self) -> u32 { self.text.width() }
+    fn height(&self) -> u32 { self.text.height() }
 }
 
 impl Enemy {
-    pub fn new(text: &str, pos: Point2, speed: f32, ctx: &mut Context) -> GameResult<Self> {
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 16)?;
-        let text = graphics::Text::new(ctx, text, &font)?;
+    pub fn new(label: &str, pos: Point2, speed: f32, sprite: Box<dyn Sprite>) -> GameResult<Self> {
+        let label = String::from(label);
 
         Ok(Enemy {
-            pos, text,
+            pos, label, sprite,
             is_alive: true,
             velocity: Vector2::new(0.0, speed),
         })
+    }
+
+    pub fn label(&self) -> &str {
+        self.label.as_str()
     }
 
     pub fn update(&mut self, seconds: f32) {
@@ -113,18 +149,14 @@ impl Enemy {
     }
 
     pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::draw_ex(ctx, &self.text, graphics::DrawParam {
-            dest: self.pos,
-            offset: Point2::new(0.5, 0.5),
-            .. Default::default()
-        })
+        self.sprite.draw(self.pos, ctx)
     }
 
     pub fn bounding_rect(&self) -> graphics::Rect {
-        let left   = self.pos.x - self.text.width()  as f32 / 2.0;
-        let right  = self.pos.x + self.text.width()  as f32 / 2.0;
-        let top    = self.pos.y - self.text.height() as f32 / 2.0;
-        let bottom = self.pos.y + self.text.height() as f32 / 2.0;
+        let left   = self.pos.x - self.sprite.width()  as f32 / 2.0;
+        let right  = self.pos.x + self.sprite.width()  as f32 / 2.0;
+        let top    = self.pos.y - self.sprite.height() as f32 / 2.0;
+        let bottom = self.pos.y + self.sprite.height() as f32 / 2.0;
 
         graphics::Rect::new(left, top, right - left, bottom - top)
     }

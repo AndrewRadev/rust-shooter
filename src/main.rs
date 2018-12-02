@@ -9,7 +9,7 @@ extern crate rand;
 use rand::Rng;
 
 extern crate shooter;
-use shooter::entities::{Player, PlayerState, Shot, Enemy};
+use shooter::entities::{Player, PlayerState, Shot, Enemy, TextSprite};
 use shooter::assets::Assets;
 
 use std::env;
@@ -103,7 +103,11 @@ impl event::EventHandler for MainState {
                 let random_point = Point2::new(rng.gen_range(40.0, ctx.conf.window_mode.width as f32 - 40.0), 0.0);
                 let random_text = Self::ENEMIES[rng.gen_range(0, Self::ENEMIES.len())];
                 let random_speed = rng.gen_range(50.0, 200.0);
-                self.enemies.push(Enemy::new(random_text, random_point, random_speed, ctx)?);
+
+                let enemy_sprite = Box::new(TextSprite::new(random_text, ctx)?);
+                let enemy = Enemy::new(random_text, random_point, random_speed, enemy_sprite)?;
+
+                self.enemies.push(enemy);
                 self.time_until_next_enemy = rng.gen_range(0.5, 1.8);
             }
 
@@ -132,7 +136,7 @@ impl event::EventHandler for MainState {
 
                 if enemy.pos.y >= self.screen_height as f32 {
                     self.game_over = true;
-                    self.killed_by = String::from(enemy.text.contents());
+                    self.killed_by = String::from(enemy.label());
                     let _ = self.assets.boom_sound.play();
                 }
             }
