@@ -6,7 +6,6 @@ use ggez::event;
 use ggez::{Context, GameResult};
 use ggez::graphics;
 use ggez::timer;
-use ggez::audio;
 use ggez::graphics::{Vector2, Point2};
 use std::env;
 use std::path;
@@ -14,27 +13,15 @@ use std::path;
 struct Assets {
     ferris_normal_image: graphics::Image,
     ferris_shooting_image: graphics::Image,
-    shot_image: graphics::Image,
-    font: graphics::Font,
-    shot_sound: audio::Source,
-    hit_sound: audio::Source,
 }
 
 impl Assets {
     fn new(ctx: &mut Context) -> GameResult<Assets> {
         let ferris_normal_image = graphics::Image::new(ctx, "/ferris-normal.png")?;
         let ferris_shooting_image = graphics::Image::new(ctx, "/ferris-shooting.png")?;
-        let shot_image = graphics::Image::new(ctx, "/shot.png")?;
-
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 18)?;
-
-        let shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
-        let hit_sound = audio::Source::new(ctx, "/boom.ogg")?;
 
         Ok(Assets {
             ferris_normal_image, ferris_shooting_image,
-            shot_image, font,
-            shot_sound, hit_sound,
         })
     }
 }
@@ -43,7 +30,6 @@ impl Assets {
 struct Player {
     pos: Point2,
     velocity: Vector2,
-    bbox_size: f32,
 }
 
 impl Player {
@@ -51,15 +37,12 @@ impl Player {
         Player {
             pos,
             velocity: Vector2::new(0.0, 0.0),
-            bbox_size: 10.0,
         }
     }
 }
 
 #[derive(Debug, Default)]
 struct InputState {
-    //xaxis: f32,
-    //yaxis: f32,
     fire: bool,
 }
 
@@ -67,8 +50,6 @@ struct MainState {
     assets: Assets,
     input: InputState,
     player: Player,
-    screen_width: u32,
-    screen_height: u32,
 }
 
 impl MainState {
@@ -78,18 +59,15 @@ impl MainState {
         let screen_height = ctx.conf.window_mode.height;
 
         // Player starts in bottom-middle of the screen
-        let player_bbox_size = 10.0;
         let player_pos = Point2::new(
             (screen_width as f32) / 2.0,
-            (screen_height as f32),
+            screen_height as f32,
         );
 
         let s = MainState {
             assets: assets,
             input: InputState::default(),
             player: Player::new(player_pos),
-            screen_width: ctx.conf.window_mode.width,
-            screen_height: ctx.conf.window_mode.height,
         };
 
         Ok(s)
@@ -102,7 +80,7 @@ impl event::EventHandler for MainState {
         const DESIRED_FPS: u32 = 60;
 
         while timer::check_update_time(ctx, DESIRED_FPS) {
-            let seconds = 1.0 / (DESIRED_FPS as f32);
+            let _seconds = 1.0 / (DESIRED_FPS as f32);
 
 
         }
