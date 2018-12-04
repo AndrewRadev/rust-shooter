@@ -7,7 +7,7 @@ use ggez::{Context, GameResult};
 use ggez::graphics;
 use ggez::timer;
 use ggez::audio;
-use ggez::graphics::{Vector2, Point2};
+use ggez::graphics::{Point2};
 
 extern crate shooter;
 use shooter::entities::{Player, PlayerState, Shot};
@@ -19,9 +19,7 @@ struct Assets {
     ferris_normal_image: graphics::Image,
     ferris_shooting_image: graphics::Image,
     shot_image: graphics::Image,
-    font: graphics::Font,
     shot_sound: audio::Source,
-    hit_sound: audio::Source,
 }
 
 impl Assets {
@@ -30,15 +28,12 @@ impl Assets {
         let ferris_shooting_image = graphics::Image::new(ctx, "/ferris-shooting.png")?;
         let shot_image = graphics::Image::new(ctx, "/shot.png")?;
 
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 18)?;
-
         let shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
-        let hit_sound = audio::Source::new(ctx, "/boom.ogg")?;
 
         Ok(Assets {
             ferris_normal_image, ferris_shooting_image,
-            shot_image, font,
-            shot_sound, hit_sound,
+            shot_image,
+            shot_sound,
         })
     }
 }
@@ -55,7 +50,6 @@ struct MainState {
     player: Player,
     shots: Vec<Shot>,
     screen_width: u32,
-    screen_height: u32,
 }
 
 impl MainState {
@@ -65,10 +59,9 @@ impl MainState {
         let screen_height = ctx.conf.window_mode.height;
 
         // Player starts in bottom-middle of the screen
-        let player_bbox_size = 10.0;
         let player_pos = Point2::new(
             (screen_width as f32) / 2.0,
-            (screen_height as f32),
+            screen_height as f32,
         );
 
         let s = MainState {
@@ -77,7 +70,6 @@ impl MainState {
             player: Player::new(player_pos),
             shots: Vec::new(),
             screen_width: ctx.conf.window_mode.width,
-            screen_height: ctx.conf.window_mode.height,
         };
 
         Ok(s)
