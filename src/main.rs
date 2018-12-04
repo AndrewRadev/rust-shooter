@@ -30,7 +30,6 @@ struct MainState {
     shots: Vec<Shot>,
     enemies: Vec<Enemy>,
     screen_width: u32,
-    screen_height: u32,
 }
 
 impl MainState {
@@ -40,15 +39,14 @@ impl MainState {
         let screen_height = ctx.conf.window_mode.height;
 
         // Player starts in bottom-middle of the screen
-        let player_bbox_size = 10.0;
         let player_pos = Point2::new(
             (screen_width as f32) / 2.0,
-            (screen_height as f32),
+            screen_height as f32,
         );
 
         let mut rng = rand::thread_rng();
         let random_point = Point2::new(rng.gen_range(0.0, ctx.conf.window_mode.width as f32), 0.0);
-        let first_enemy = Enemy::new("C++", random_point, ctx, &assets)?;
+        let first_enemy = Enemy::new("C++", random_point, ctx)?;
 
         let s = MainState {
             assets: assets,
@@ -57,7 +55,6 @@ impl MainState {
             shots: Vec::new(),
             enemies: vec![first_enemy],
             screen_width: ctx.conf.window_mode.width,
-            screen_height: ctx.conf.window_mode.height,
         };
 
         Ok(s)
@@ -143,11 +140,11 @@ impl event::EventHandler for MainState {
         self.player.draw(ctx, &self.assets)?;
 
         for shot in self.shots.iter_mut() {
-            shot.draw(ctx, &self.assets);
+            shot.draw(ctx, &self.assets)?;
         }
 
         for enemy in self.enemies.iter_mut() {
-            enemy.draw(ctx);
+            enemy.draw(ctx)?;
         }
 
         graphics::present(ctx);

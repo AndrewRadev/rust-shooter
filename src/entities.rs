@@ -98,7 +98,7 @@ pub struct Enemy {
 }
 
 impl Enemy {
-    pub fn new(text: &str, pos: Point2, ctx: &mut Context, assets: &Assets) -> GameResult<Self> {
+    pub fn new(text: &str, pos: Point2, ctx: &mut Context) -> GameResult<Self> {
         let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 24)?;
         let text = graphics::Text::new(ctx, text, &font)?;
 
