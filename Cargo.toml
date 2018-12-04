@@ -4,5 +4,8 @@ version = "0.1.0"
 authors = ["Andrew"]
 
 [dependencies]
-ggez = "0.4.2"
+ggez = "0.4.4"
 rand = "*"
+
+[dev-dependencies]
+quickcheck = "*"

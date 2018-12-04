@@ -1,5 +1,7 @@
 extern crate ggez;
 extern crate shooter;
+#[macro_use]
+extern crate quickcheck;
 
 use ggez::{Context, GameResult};
 use ggez::graphics::Point2;
@@ -20,25 +22,25 @@ impl Sprite for MockSprite {
     fn height(&self) -> u32 { self.height }
 }
 
-#[test]
-fn test_enemies_fall_downwards() {
-    let mock_sprite = Box::new(MockSprite { width: 100, height: 100 });
-    let mut enemy = Enemy::new("test", na::Point2::new(1000.0, 1000.0), 10.0, mock_sprite).unwrap();
+quickcheck! {
+    fn prop_enemies_fall_downwards(x: f32, y: f32) -> bool {
+        let mock_sprite = Box::new(MockSprite { width: 100, height: 100 });
+        let mut enemy = Enemy::new("test", na::Point2::new(x, y), 10.0, mock_sprite).unwrap();
 
-    let old_pos = enemy.pos.clone();
-    enemy.update(10.0);
+        let old_pos = enemy.pos.clone();
+        enemy.update(10.0);
 
-    assert_eq!(enemy.pos.x, old_pos.x);
-    assert!(enemy.pos.y > old_pos.y);
-}
+        enemy.pos.x == old_pos.x &&
+            enemy.pos.y > old_pos.y
+    }
 
-#[test]
-fn test_shots_fly_upwards() {
-    let mut shot = Shot::new(na::Point2::new(0.0, 0.0));
+    fn prop_shots_fly_upwards(x: f32, y: f32) -> bool {
+        let mut shot = Shot::new(na::Point2::new(x, y));
 
-    let old_pos = shot.pos.clone();
-    shot.update(10.0);
+        let old_pos = shot.pos.clone();
+        shot.update(10.0);
 
-    assert_eq!(shot.pos.x, old_pos.x);
-    assert!(shot.pos.y < old_pos.y);
+        shot.pos.x == old_pos.x &&
+            shot.pos.y < old_pos.y
+    }
 }
