@@ -2,7 +2,7 @@ use ggez::{Context, GameResult};
 use ggez::graphics::{self, Vector2, Point2};
 use ggez::nalgebra as na;
 
-use assets::{Assets, Sprite};
+use crate::assets::{Assets, Sprite};
 
 #[derive(Debug)]
 pub enum PlayerState {
