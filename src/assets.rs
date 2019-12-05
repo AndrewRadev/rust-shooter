@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 use ggez::{Context, GameResult};
 use ggez::graphics;
+use ggez::mint::Point2;
 use ggez::audio;
 
 pub struct Assets {
@@ -28,9 +29,9 @@ impl Assets {
 }
 
 pub trait Sprite: Debug {
-    fn draw(&mut self, center: graphics::Point2, ctx: &mut Context) -> GameResult<()>;
-    fn width(&self) -> u32;
-    fn height(&self) -> u32;
+    fn draw(&mut self, center: Point2<f32>, ctx: &mut Context) -> GameResult<()>;
+    fn width(&self, ctx: &mut Context) -> u32;
+    fn height(&self, ctx: &mut Context) -> u32;
 }
 
 #[derive(Debug)]
@@ -40,21 +41,22 @@ pub struct TextSprite {
 
 impl TextSprite {
     pub fn new(label: &str, ctx: &mut Context) -> GameResult<TextSprite> {
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 16)?;
-        let text = graphics::Text::new(ctx, label, &font)?;
+        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
+        let mut text = graphics::Text::new(label);
+        text.set_font(font, graphics::Scale::uniform(24.0));
         Ok(TextSprite { text })
     }
 }
 
 impl Sprite for TextSprite {
-    fn draw(&mut self, center: graphics::Point2, ctx: &mut Context) -> GameResult<()> {
-        graphics::draw_ex(ctx, &self.text, graphics::DrawParam {
+    fn draw(&mut self, center: Point2<f32>, ctx: &mut Context) -> GameResult<()> {
+        graphics::draw(ctx, &self.text, graphics::DrawParam {
             dest: center,
-            offset: graphics::Point2::new(0.5, 0.5),
+            offset: Point2 { x: 0.5, y: 0.5 },
             .. Default::default()
         })
     }
 
-    fn width(&self) -> u32 { self.text.width() }
-    fn height(&self) -> u32 { self.text.height() }
+    fn width(&self, ctx: &mut Context) -> u32 { self.text.width(ctx) }
+    fn height(&self, ctx: &mut Context) -> u32 { self.text.height(ctx) }
 }

@@ -5,8 +5,8 @@ authors = ["Andrew"]
 edition = "2018"
 
 [dependencies]
-ggez = "0.4.4"
-rand = "*"
+ggez = "0.5.1"
+rand = "0.7.2"
 
 [dev-dependencies]
-quickcheck = "*"
+quickcheck = "0.9.0"

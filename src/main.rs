@@ -1,14 +1,15 @@
-extern crate ggez;
-use ggez::conf::{WindowMode};
-use ggez::{Context, ContextBuilder, GameResult};
+use ggez::audio::SoundSource;
+use ggez::conf::{Conf, WindowMode};
 use ggez::event;
+use ggez::filesystem;
+use ggez::graphics;
+use ggez::input;
+use ggez::mint::Point2;
 use ggez::timer;
-use ggez::graphics::{self, Point2};
+use ggez::{Context, ContextBuilder, GameResult};
 
-extern crate rand;
 use rand::Rng;
 
-extern crate shooter;
 use shooter::entities::{Player, PlayerState, Shot, Enemy};
 use shooter::assets::{Assets, TextSprite};
 
@@ -22,6 +23,7 @@ struct InputState {
 }
 
 struct MainState {
+    conf: Conf,
     game_over: bool,
     killed_by: String,
     score: u32,
@@ -31,8 +33,8 @@ struct MainState {
     shots: Vec<Shot>,
     enemies: Vec<Enemy>,
     time_until_next_enemy: f32,
-    screen_width: u32,
-    screen_height: u32,
+    screen_width: f32,
+    screen_height: f32,
 }
 
 impl MainState {
@@ -42,18 +44,19 @@ impl MainState {
         "Unnecessary Heap Allocations", "Data Races"
     ];
 
-    fn new(ctx: &mut Context) -> GameResult<MainState> {
+    fn new(ctx: &mut Context, conf: &Conf) -> GameResult<MainState> {
         let assets = Assets::new(ctx)?;
-        let screen_width = ctx.conf.window_mode.width;
-        let screen_height = ctx.conf.window_mode.height;
+        let screen_width = conf.window_mode.width;
+        let screen_height = conf.window_mode.height;
 
         // Player starts in bottom-middle of the screen
-        let player_pos = Point2::new(
-            (screen_width as f32) / 2.0,
-            screen_height as f32,
-        );
+        let player_pos = Point2 {
+            x: screen_width / 2.0,
+            y: screen_height,
+        };
 
         let s = MainState {
+            conf: conf.clone(),
             game_over: false,
             score: 0,
             killed_by: String::new(),
@@ -63,17 +66,17 @@ impl MainState {
             shots: Vec::new(),
             enemies: Vec::new(),
             time_until_next_enemy: 1.0,
-            screen_width: ctx.conf.window_mode.width,
-            screen_height: ctx.conf.window_mode.height,
+            screen_width: conf.window_mode.width,
+            screen_height: conf.window_mode.height,
         };
 
         Ok(s)
     }
 
-    fn handle_collisions(&mut self) {
+    fn handle_collisions(&mut self, ctx: &mut Context) {
         for enemy in &mut self.enemies {
             for shot in &mut self.shots {
-                if enemy.bounding_rect().contains(shot.pos) {
+                if enemy.bounding_rect(ctx).contains(shot.pos) {
                     shot.is_alive = false;
                     enemy.is_alive = false;
                     self.score += 1;
@@ -100,7 +103,10 @@ impl event::EventHandler for MainState {
             self.time_until_next_enemy -= seconds;
             if self.time_until_next_enemy <= 0.0 {
                 let mut rng = rand::thread_rng();
-                let random_point = Point2::new(rng.gen_range(40.0, ctx.conf.window_mode.width as f32 - 40.0), 0.0);
+                let random_point = Point2 {
+                    x: rng.gen_range(40.0, self.conf.window_mode.width as f32 - 40.0),
+                    y: 0.0,
+                };
                 let random_text = Self::ENEMIES[rng.gen_range(0, Self::ENEMIES.len())];
                 let random_speed = rng.gen_range(50.0, 200.0);
 
@@ -115,7 +121,10 @@ impl event::EventHandler for MainState {
             self.player.update(self.input.movement, seconds, self.screen_width as f32);
             self.player.time_until_next_shot -= seconds;
             if self.input.fire && self.player.time_until_next_shot < 0.0 {
-                let shot_pos = Point2::new(self.player.pos.x - 75.0, self.player.pos.y - 80.0);
+                let shot_pos = Point2 {
+                    x: self.player.pos.x - 75.0,
+                    y: self.player.pos.y - 80.0,
+                };
                 let shot = Shot::new(shot_pos);
                 self.shots.push(shot);
 
@@ -141,7 +150,7 @@ impl event::EventHandler for MainState {
                 }
             }
 
-            self.handle_collisions();
+            self.handle_collisions(ctx);
 
             self.shots.retain(|shot| shot.is_alive && shot.pos.y >= 0.0);
             self.enemies.retain(|enemy| enemy.is_alive);
@@ -152,44 +161,47 @@ impl event::EventHandler for MainState {
 
     fn key_down_event(&mut self,
                       ctx: &mut Context,
-                      keycode: event::Keycode,
-                      _keymod: event::Mod,
+                      keycode: event::KeyCode,
+                      _keymod: input::keyboard::KeyMods,
                       _repeat: bool) {
         match keycode {
-            event::Keycode::Space => self.input.fire = true,
-            event::Keycode::Left => self.input.movement = -1.0,
-            event::Keycode::Right => self.input.movement = 1.0,
-            event::Keycode::Escape => ctx.quit().unwrap(),
+            event::KeyCode::Space => self.input.fire = true,
+            event::KeyCode::Left => self.input.movement = -1.0,
+            event::KeyCode::Right => self.input.movement = 1.0,
+            event::KeyCode::Escape => event::quit(ctx),
             _ => (), // Do nothing
         }
     }
 
     fn key_up_event(&mut self,
                     _ctx: &mut Context,
-                    keycode: event::Keycode,
-                    _keymod: event::Mod,
-                    _repeat: bool) {
+                    keycode: event::KeyCode,
+                    _keymod: input::keyboard::KeyMods) {
         match keycode {
-            event::Keycode::Space => self.input.fire = false,
-            event::Keycode::Left | event::Keycode::Right => self.input.movement = 0.0,
+            event::KeyCode::Space => self.input.fire = false,
+            event::KeyCode::Left | event::KeyCode::Right => self.input.movement = 0.0,
             _ => (), // Do nothing
         }
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx);
+        graphics::clear(ctx, graphics::Color::from_rgb(26, 51, 77));
 
         if self.game_over {
-            let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf", 24)?;
-            let text = graphics::Text::new(ctx, &format!("Killed by {}. Score: {}", self.killed_by, self.score), &font)?;
+            let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
+            let mut text = graphics::Text::new(format!("Killed by {}. Score: {}", self.killed_by, self.score));
+            text.set_font(font, graphics::Scale::uniform(40.0));
 
-            let center = Point2::new(self.screen_width as f32 / 2.0, self.screen_height as f32 / 2.0);
-            graphics::draw_ex(ctx, &text, graphics::DrawParam {
+            let center = Point2 {
+                x: self.screen_width / 2.0,
+                y: self.screen_height / 2.0,
+            };
+            graphics::draw(ctx, &text, graphics::DrawParam {
                 dest: center,
-                offset: Point2::new(0.5, 0.5),
+                offset: Point2 { x: 0.5, y: 0.5 },
                 .. Default::default()
             })?;
-            graphics::present(ctx);
+            graphics::present(ctx)?;
             return Ok(())
         }
 
@@ -205,37 +217,48 @@ impl event::EventHandler for MainState {
 
         if std::env::var("DEBUG").is_ok() {
             for enemy in &mut self.enemies {
-                graphics::set_color(ctx, graphics::Color::new(1.0, 0.0, 0.0, 1.0))?;
-                graphics::rectangle(ctx, graphics::DrawMode::Line(1.0), enemy.bounding_rect())?;
-                graphics::set_color(ctx, graphics::Color::new(1.0, 1.0, 1.0, 1.0))?;
+                let draw_mode = graphics::DrawMode::Stroke(graphics::StrokeOptions::default().with_line_width(1.0));
+                let outline = graphics::MeshBuilder::new().
+                    rectangle(
+                        draw_mode,
+                        enemy.bounding_rect(ctx),
+                        graphics::Color::from_rgb(255, 0, 0)
+                    ).
+                    build(ctx).unwrap();
+
+                graphics::draw(ctx, &outline, graphics::DrawParam::default())?
             }
         }
 
-        graphics::present(ctx);
+        graphics::present(ctx)?;
         Ok(())
     }
 }
 
 pub fn main() {
-    let ctx = &mut ContextBuilder::new("shooter", "Andrew").
+    let conf = Conf::new().
         window_mode(WindowMode {
-            min_width: 1024,
-            min_height: 768,
+            min_width: 1024.0,
+            min_height: 768.0,
             ..Default::default()
-        }).
-        build().unwrap();
+        });
+
+    let (ctx, event_loop) = &mut ContextBuilder::new("shooter", "Andrew").
+        conf(conf.clone()).
+        build().
+        unwrap();
 
     // We add the CARGO_MANIFEST_DIR/resources do the filesystems paths so
     // we we look in the cargo project for files.
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources");
-        ctx.filesystem.mount(&path, true);
+        filesystem::mount(ctx, &path, true);
     }
 
-    let state = &mut MainState::new(ctx).unwrap();
+    let state = &mut MainState::new(ctx, &conf).unwrap();
 
-    if let Err(e) = event::run(ctx, state) {
+    if let Err(e) = event::run(ctx, event_loop, state) {
         println!("Error encountered: {}", e);
     } else {
         println!("Game exited cleanly.");
