@@ -144,7 +144,13 @@ impl event::EventHandler for MainState {
                 enemy.update(seconds);
 
                 if enemy.pos.y >= self.screen_height as f32 {
-                    self.game_over = true;
+                    if env::var("DEBUG").is_ok() {
+                        // We don't end the game in debug mode, but we do make sure the enemy is
+                        // dead
+                        enemy.is_alive = false;
+                    } else {
+                        self.game_over = true;
+                    }
                     self.killed_by = String::from(enemy.label());
                     let _ = self.assets.boom_sound.play();
                 }
