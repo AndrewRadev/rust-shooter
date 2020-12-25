@@ -43,7 +43,7 @@ impl TextSprite {
     pub fn new(label: &str, ctx: &mut Context) -> GameResult<TextSprite> {
         let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
         let mut text = graphics::Text::new(label);
-        text.set_font(font, graphics::Scale::uniform(16.0));
+        text.set_font(font, graphics::PxScale::from(16.0));
         Ok(TextSprite { text })
     }
 }

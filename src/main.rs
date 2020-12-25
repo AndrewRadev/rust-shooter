@@ -80,7 +80,7 @@ impl MainState {
                     shot.is_alive = false;
                     enemy.is_alive = false;
                     self.score += 1;
-                    let _ = self.assets.boom_sound.play();
+                    let _ = self.assets.boom_sound.play(ctx);
                 }
             }
         }
@@ -128,7 +128,7 @@ impl event::EventHandler for MainState {
                 let shot = Shot::new(shot_pos);
                 self.shots.push(shot);
 
-                let _ = self.assets.shot_sound.play();
+                let _ = self.assets.shot_sound.play(ctx);
 
                 self.player.time_until_next_shot = Player::SHOT_TIMEOUT;
                 self.player.state = PlayerState::Shooting;
@@ -152,7 +152,7 @@ impl event::EventHandler for MainState {
                         self.game_over = true;
                     }
                     self.killed_by = String::from(enemy.label());
-                    let _ = self.assets.boom_sound.play();
+                    let _ = self.assets.boom_sound.play(ctx);
                 }
             }
 
@@ -197,7 +197,7 @@ impl event::EventHandler for MainState {
         if self.game_over {
             let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
             let mut text = graphics::Text::new(format!("Killed by {}. Score: {}", self.killed_by, self.score));
-            text.set_font(font, graphics::Scale::uniform(40.0));
+            text.set_font(font, graphics::PxScale::from(40.0));
 
             let center = Point2 {
                 x: self.screen_width as f32 / 2.0,
@@ -263,9 +263,5 @@ pub fn main() {
 
     let state = MainState::new(&mut ctx, &conf).unwrap();
 
-    if let Err(e) = event::run(ctx, event_loop, state) {
-        println!("Error encountered: {}", e);
-    } else {
-        println!("Game exited cleanly.");
-    }
+    event::run(ctx, event_loop, state);
 }
