@@ -43,7 +43,7 @@ impl MainState {
     const ENEMIES: [&'static str; 7] = [
         "Segfaults", "Undefined Behaviour",
         "NULLs", "Inefficiencies", "Bloat",
-        "Unnecessary Heap Allocations", "Data Races"
+        "Unnecessary Heap\nAllocations", "Data Races"
     ];
 
     fn new(ctx: &mut Context, conf: &Conf) -> GameResult<MainState> {
@@ -106,7 +106,7 @@ impl event::EventHandler for MainState {
             self.time_until_next_enemy -= seconds;
             if self.time_until_next_enemy <= 0.0 {
                 let random_point = Point2 {
-                    x: self.rng.gen_range(40.0 .. self.conf.window_mode.width - 40.0),
+                    x: self.rng.gen_range(0.0 .. self.conf.window_mode.width - 100.0),
                     y: 0.0,
                 };
                 let random_text = Self::ENEMIES[self.rng.gen_range(0 .. Self::ENEMIES.len())];
@@ -198,16 +198,15 @@ impl event::EventHandler for MainState {
 
         if self.game_over {
             let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
-            let mut text = graphics::Text::new(format!("Killed by {}. Score: {}", self.killed_by, self.score));
+            let mut text = graphics::Text::new(format!("Killed by {}.\nScore: {}", self.killed_by, self.score));
             text.set_font(font, graphics::PxScale::from(40.0));
 
-            let center = Point2 {
-                x: self.screen_width as f32 / 2.0,
-                y: self.screen_height as f32 / 2.0,
+            let top_left = Point2 {
+                x: (self.screen_width - text.width(ctx) as f32) / 2.0,
+                y: (self.screen_height - text.height(ctx) as f32) / 2.0,
             };
             graphics::draw(ctx, &text, graphics::DrawParam {
-                dest: center,
-                offset: Point2 { x: 0.5, y: 0.5 },
+                dest: top_left,
                 .. Default::default()
             })?;
             graphics::present(ctx)?;

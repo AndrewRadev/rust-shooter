@@ -123,10 +123,10 @@ impl Enemy {
     }
 
     pub fn bounding_rect(&self, ctx: &mut Context) -> graphics::Rect {
-        let left   = self.pos.x - self.sprite.width(ctx)  as f32 / 2.0;
-        let right  = self.pos.x + self.sprite.width(ctx)  as f32 / 2.0;
-        let top    = self.pos.y - self.sprite.height(ctx) as f32 / 2.0;
-        let bottom = self.pos.y + self.sprite.height(ctx) as f32 / 2.0;
+        let left   = self.pos.x;
+        let right  = self.pos.x + self.sprite.width(ctx)  as f32;
+        let top    = self.pos.y;
+        let bottom = self.pos.y + self.sprite.height(ctx) as f32;
 
         graphics::Rect::new(left, top, right - left, bottom - top)
     }

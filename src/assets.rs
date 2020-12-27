@@ -43,16 +43,15 @@ impl TextSprite {
     pub fn new(label: &str, ctx: &mut Context) -> GameResult<TextSprite> {
         let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
         let mut text = graphics::Text::new(label);
-        text.set_font(font, graphics::PxScale::from(16.0));
+        text.set_font(font, graphics::PxScale::from(18.0));
         Ok(TextSprite { text })
     }
 }
 
 impl Sprite for TextSprite {
-    fn draw(&mut self, center: Point2<f32>, ctx: &mut Context) -> GameResult<()> {
+    fn draw(&mut self, top_left: Point2<f32>, ctx: &mut Context) -> GameResult<()> {
         graphics::draw(ctx, &self.text, graphics::DrawParam {
-            dest: center,
-            offset: Point2 { x: 0.5, y: 0.5 },
+            dest: top_left,
             .. Default::default()
         })
     }
