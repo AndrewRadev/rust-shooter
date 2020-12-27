@@ -12,6 +12,7 @@ use rand::rngs::ThreadRng;
 
 use shooter::entities::{Player, PlayerState, Shot, Enemy};
 use shooter::assets::{Assets, TextSprite};
+use shooter::debug;
 
 use std::env;
 use std::path;
@@ -145,15 +146,15 @@ impl event::EventHandler for MainState {
                 enemy.update(seconds);
 
                 if enemy.pos.y >= self.screen_height as f32 {
-                    if env::var("DEBUG").is_ok() {
+                    if debug::is_active() {
                         // We don't end the game in debug mode, but we do make sure the enemy is
-                        // dead
+                        // cleaned up from the enemy array
                         enemy.is_alive = false;
                     } else {
                         self.game_over = true;
+                        self.killed_by = String::from(enemy.label());
+                        let _ = self.assets.boom_sound.play(ctx);
                     }
-                    self.killed_by = String::from(enemy.label());
-                    let _ = self.assets.boom_sound.play(ctx);
                 }
             }
 
@@ -192,8 +193,8 @@ impl event::EventHandler for MainState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        // TODO: comment re: clear color
-        graphics::clear(ctx, graphics::Color::from_rgb(26, 51, 77));
+        let dark_blue = graphics::Color::from_rgb(26, 51, 77);
+        graphics::clear(ctx, dark_blue);
 
         if self.game_over {
             let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
@@ -223,17 +224,9 @@ impl event::EventHandler for MainState {
             enemy.draw(ctx)?;
         }
 
-        if std::env::var("DEBUG").is_ok() {
+        if debug::is_active() {
             for enemy in &mut self.enemies {
-                let draw_mode = graphics::DrawMode::Stroke(graphics::StrokeOptions::default().with_line_width(1.0));
-                let outline = graphics::MeshBuilder::new().
-                    rectangle(
-                        draw_mode,
-                        enemy.bounding_rect(ctx),
-                        graphics::Color::from_rgb(255, 0, 0)
-                    ).
-                    build(ctx).unwrap();
-                graphics::draw(ctx, &outline, graphics::DrawParam::default())?;
+                debug::draw_outline(enemy.bounding_rect(ctx), ctx).unwrap();
             }
         }
 
