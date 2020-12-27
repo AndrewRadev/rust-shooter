@@ -7,8 +7,8 @@ use ggez::input;
 use ggez::mint::Point2;
 use ggez::timer;
 use ggez::{Context, ContextBuilder, GameResult};
-
 use rand::Rng;
+use rand::rngs::ThreadRng;
 
 use shooter::entities::{Player, PlayerState, Shot, Enemy};
 use shooter::assets::{Assets, TextSprite};
@@ -24,6 +24,7 @@ struct InputState {
 
 struct MainState {
     conf: Conf,
+    rng: ThreadRng,
     game_over: bool,
     killed_by: String,
     score: u32,
@@ -57,6 +58,7 @@ impl MainState {
 
         let s = MainState {
             conf: conf.clone(),
+            rng: rand::thread_rng(),
             game_over: false,
             score: 0,
             killed_by: String::new(),
@@ -102,19 +104,18 @@ impl event::EventHandler for MainState {
             // Spawn enemies
             self.time_until_next_enemy -= seconds;
             if self.time_until_next_enemy <= 0.0 {
-                let mut rng = rand::thread_rng();
                 let random_point = Point2 {
-                    x: rng.gen_range(40.0 .. self.conf.window_mode.width - 40.0),
+                    x: self.rng.gen_range(40.0 .. self.conf.window_mode.width - 40.0),
                     y: 0.0,
                 };
-                let random_text = Self::ENEMIES[rng.gen_range(0 .. Self::ENEMIES.len())];
-                let random_speed = rng.gen_range(50.0 .. 200.0);
+                let random_text = Self::ENEMIES[self.rng.gen_range(0 .. Self::ENEMIES.len())];
+                let random_speed = self.rng.gen_range(50.0 .. 200.0);
 
                 let enemy_sprite = Box::new(TextSprite::new(random_text, ctx)?);
                 let enemy = Enemy::new(random_text, random_point, random_speed, enemy_sprite)?;
 
                 self.enemies.push(enemy);
-                self.time_until_next_enemy = rng.gen_range(0.5 .. 1.8);
+                self.time_until_next_enemy = self.rng.gen_range(0.5 .. 1.8);
             }
 
             // Update player state
