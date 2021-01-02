@@ -2,4 +2,4 @@ A toy game created to play around with the [ggez](https://github.com/ggez/ggez) 
 
 ![Screenshot](screenshot.png)
 
-Running it with `cargo run` should be possible, but you might need to read up on the instructions for setting up SDL2: [Rust-SDL2](https://github.com/Rust-SDL2/rust-sdl2/blob/master/README.md)
+It should be possible to execute it with a simple `cargo run`.
