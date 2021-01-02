@@ -343,6 +343,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cocoa"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f63902e9223530efb4e26ccd0cf55ec30d592d3b42e21a28defc42a9586e832"
+dependencies = [
+ "bitflags",
+ "block",
+ "cocoa-foundation",
+ "core-foundation 0.9.1",
+ "core-graphics 0.22.2",
+ "foreign-types",
+ "libc",
+ "objc",
+]
+
+[[package]]
 name = "cocoa-foundation"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -916,8 +932,8 @@ dependencies = [
 
 [[package]]
 name = "ggez"
-version = "0.6.0-norelease"
-source = "git+https://github.com/ggez/ggez?rev=ecedddd7291e3212168035ce9ca00d70d795707d#ecedddd7291e3212168035ce9ca00d70d795707d"
+version = "0.6.0-rc0"
+source = "git+https://github.com/ggez/ggez?rev=bd1e015899d5f6b086e7603dffe48f3dd8806e49#bd1e015899d5f6b086e7603dffe48f3dd8806e49"
 dependencies = [
  "approx",
  "bitflags",
@@ -1006,9 +1022,9 @@ dependencies = [
 
 [[package]]
 name = "glam"
-version = "0.10.2"
+version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "579160312273c954cc51bd440f059dde741029ac8daf8c84fece76cb77f62c15"
+checksum = "49d9e5a6410cd46e6bea97123cec5ef1cba14274aad26a1835dd3c9b753ae069"
 dependencies = [
  "mint",
  "version_check",
@@ -1022,13 +1038,13 @@ checksum = "9b919933a397b79c37e33b77bb2aa3dc8eb6e165ad809e58ff75bc7db2e34574"
 
 [[package]]
 name = "glutin"
-version = "0.25.1"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8bae26a39a728b003e9fad473ea89527de0de050143b4df866f18bb154bc86e"
+checksum = "1ae1cbb9176b9151c4ce03f012e3cd1c6c18c4be79edeaeb3d99f5d8085c5fa3"
 dependencies = [
  "android_glue",
  "cgl",
- "cocoa",
+ "cocoa 0.23.0",
  "core-foundation 0.9.1",
  "glutin_egl_sys",
  "glutin_emscripten_sys",
@@ -1851,9 +1867,9 @@ dependencies = [
 
 [[package]]
 name = "old_school_gfx_glutin_ext"
-version = "0.25.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97d3bf7a77b32b947b6eaa3bc3671d50a74cd9aafdbbd4f9a4feb03ed3a0ee94"
+checksum = "450a2a0e6805771787b965af9a552581c9dfc588dc33761c1be690117cd792e1"
 dependencies = [
  "gfx_core",
  "gfx_device_gl",
@@ -3119,12 +3135,12 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "winit"
-version = "0.23.0"
+version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5bc559da567d8aa671bbcd08304d49e982c7bf2cb91e10288b9188931c1b772"
+checksum = "da4eda6fce0eb84bd0a33e3c8794eb902e1033d0a1d5a31bc4f19b1b4bbff597"
 dependencies = [
  "bitflags",
- "cocoa",
+ "cocoa 0.24.0",
  "core-foundation 0.9.1",
  "core-graphics 0.22.2",
  "core-video-sys",

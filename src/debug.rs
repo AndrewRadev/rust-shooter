@@ -10,6 +10,7 @@ pub fn draw_outline(bounding_box: graphics::Rect, ctx: &mut Context) -> GameResu
     let red = graphics::Color::from_rgb(255, 0, 0);
     let outline = graphics::MeshBuilder::new().
         rectangle(draw_mode, bounding_box, red).
+        unwrap().
         build(ctx).
         unwrap();
 

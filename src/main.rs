@@ -99,7 +99,7 @@ impl event::EventHandler for MainState {
 
         const DESIRED_FPS: u32 = 60;
 
-        while timer::check_update_time(ctx, DESIRED_FPS) {
+        while timer::check_update_time(ctx, DESIRED_FPS)? {
             let seconds = 1.0 / (DESIRED_FPS as f32);
 
             // Spawn enemies
@@ -242,7 +242,7 @@ pub fn main() {
             ..Default::default()
         });
     let (mut ctx, event_loop) = ContextBuilder::new("shooter", "Andrew").
-        conf(conf.clone()).
+        default_conf(conf.clone()).
         build().
         unwrap();
 

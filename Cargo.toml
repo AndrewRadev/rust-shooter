@@ -5,7 +5,7 @@ authors = ["Andrew"]
 edition = "2018"
 
 [dependencies]
-ggez = { git = "https://github.com/ggez/ggez", rev = "ecedddd7291e3212168035ce9ca00d70d795707d" }
+ggez = { git = "https://github.com/ggez/ggez", rev = "bd1e015899d5f6b086e7603dffe48f3dd8806e49" }
 nalgebra = "0.23.2"
 rand = "0.8.0"
 
