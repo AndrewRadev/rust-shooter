@@ -46,7 +46,7 @@ impl MainState {
         "Unnecessary Heap\nAllocations", "Data Races"
     ];
 
-    fn new(ctx: &mut Context, conf: &Conf) -> GameResult<MainState> {
+    fn new(ctx: &mut Context, conf: Conf) -> GameResult<MainState> {
         let assets = Assets::new(ctx)?;
         let screen_width = conf.window_mode.width;
         let screen_height = conf.window_mode.height;
@@ -254,7 +254,7 @@ pub fn main() {
         filesystem::mount(&mut ctx, &path, true);
     }
 
-    let state = MainState::new(&mut ctx, &conf).unwrap();
+    let state = MainState::new(&mut ctx, conf).unwrap();
 
     event::run(ctx, event_loop, state);
 }

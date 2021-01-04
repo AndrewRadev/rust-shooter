@@ -7,20 +7,20 @@ use shooter::assets::Sprite;
 
 #[derive(Debug)]
 struct MockSprite {
-    width: u32,
-    height: u32,
+    width: f32,
+    height: f32,
 }
 
 impl Sprite for MockSprite {
     fn draw(&mut self, _center: Point2<f32>, _ctx: &mut Context) -> GameResult<()> { Ok(()) }
 
-    fn width(&self, _ctx: &mut Context) -> u32 { self.width }
-    fn height(&self, _ctx: &mut Context) -> u32 { self.height }
+    fn width(&self, _ctx: &mut Context) -> f32 { self.width }
+    fn height(&self, _ctx: &mut Context) -> f32 { self.height }
 }
 
 quickcheck! {
     fn prop_enemies_fall_downwards(x: f32, y: f32) -> bool {
-        let mock_sprite = Box::new(MockSprite { width: 100, height: 100 });
+        let mock_sprite = Box::new(MockSprite { width: 100.0, height: 100.0 });
         let mut enemy = Enemy::new("test", Point2 { x, y }, 10.0, mock_sprite).unwrap();
 
         let old_pos = enemy.pos.clone();

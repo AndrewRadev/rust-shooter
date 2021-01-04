@@ -14,9 +14,9 @@ pub struct Assets {
 
 impl Assets {
     pub fn new(ctx: &mut Context) -> GameResult<Assets> {
-        let ferris_normal_image = graphics::Image::new(ctx, "/ferris-normal.png")?;
+        let ferris_normal_image   = graphics::Image::new(ctx, "/ferris-normal.png")?;
         let ferris_shooting_image = graphics::Image::new(ctx, "/ferris-shooting.png")?;
-        let shot_image = graphics::Image::new(ctx, "/shot.png")?;
+        let shot_image            = graphics::Image::new(ctx, "/shot.png")?;
 
         let shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
         let boom_sound = audio::Source::new(ctx, "/boom.ogg")?;
@@ -30,8 +30,8 @@ impl Assets {
 
 pub trait Sprite: Debug {
     fn draw(&mut self, center: Point2<f32>, ctx: &mut Context) -> GameResult<()>;
-    fn width(&self, ctx: &mut Context) -> u32;
-    fn height(&self, ctx: &mut Context) -> u32;
+    fn width(&self, ctx: &mut Context) -> f32;
+    fn height(&self, ctx: &mut Context) -> f32;
 }
 
 #[derive(Debug)]
@@ -43,7 +43,7 @@ impl TextSprite {
     pub fn new(label: &str, ctx: &mut Context) -> GameResult<TextSprite> {
         let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
         let mut text = graphics::Text::new(label);
-        text.set_font(font, graphics::PxScale::from(18.0));
+        text.set_font(font, graphics::PxScale::from(26.0));
         Ok(TextSprite { text })
     }
 }
@@ -56,6 +56,6 @@ impl Sprite for TextSprite {
         })
     }
 
-    fn width(&self, ctx: &mut Context) -> u32 { self.text.width(ctx) }
-    fn height(&self, ctx: &mut Context) -> u32 { self.text.height(ctx) }
+    fn width(&self, ctx: &mut Context) -> f32 { self.text.width(ctx) }
+    fn height(&self, ctx: &mut Context) -> f32 { self.text.height(ctx) }
 }
