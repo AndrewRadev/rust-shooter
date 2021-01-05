@@ -5,9 +5,10 @@ use ggez::{Context, GameResult};
 use std::fmt::Debug;
 
 pub struct Assets {
-    pub ferris_normal_image: graphics::Image,
+    pub ferris_normal_image:   graphics::Image,
     pub ferris_shooting_image: graphics::Image,
-    pub shot_image: graphics::Image,
+    pub shot_image:            graphics::Image,
+
     pub shot_sound: audio::Source,
     pub boom_sound: audio::Source,
 }

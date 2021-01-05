@@ -24,7 +24,6 @@ struct InputState {
 }
 
 struct MainState {
-    conf: Conf,
     rng: ThreadRng,
     game_over: bool,
     killed_by: String,
@@ -46,19 +45,18 @@ impl MainState {
         "Unnecessary Heap\nAllocations", "Data Races"
     ];
 
-    fn new(ctx: &mut Context, conf: Conf) -> GameResult<MainState> {
+    fn new(ctx: &mut Context, conf: &Conf) -> GameResult<MainState> {
         let assets = Assets::new(ctx)?;
         let screen_width = conf.window_mode.width;
         let screen_height = conf.window_mode.height;
 
         // Player starts in bottom-middle of the screen
         let player_pos = Point2 {
-            x: (screen_width as f32) / 2.0,
-            y: screen_height as f32,
+            x: screen_width / 2.0,
+            y: screen_height,
         };
 
         let s = MainState {
-            conf: conf.clone(),
             rng: rand::thread_rng(),
             game_over: false,
             score: 0,
@@ -106,7 +104,7 @@ impl event::EventHandler for MainState {
             self.time_until_next_enemy -= seconds;
             if self.time_until_next_enemy <= 0.0 {
                 let random_point = Point2 {
-                    x: self.rng.gen_range(0.0 .. self.conf.window_mode.width - 100.0),
+                    x: self.rng.gen_range(0.0 .. self.screen_width - 100.0),
                     y: 0.0,
                 };
                 let random_text = Self::ENEMIES[self.rng.gen_range(0 .. Self::ENEMIES.len())];
@@ -120,7 +118,7 @@ impl event::EventHandler for MainState {
             }
 
             // Update player state
-            self.player.update(self.input.movement, seconds, self.screen_width as f32);
+            self.player.update(self.input.movement, seconds, self.screen_width);
             self.player.time_until_next_shot -= seconds;
             if self.input.fire && self.player.time_until_next_shot < 0.0 {
                 let shot_pos = Point2 {
@@ -145,7 +143,7 @@ impl event::EventHandler for MainState {
             for enemy in self.enemies.iter_mut() {
                 enemy.update(seconds);
 
-                if enemy.pos.y >= self.screen_height as f32 {
+                if enemy.pos.y >= self.screen_height {
                     if debug::is_active() {
                         // We don't end the game in debug mode, but we do make sure the enemy is
                         // cleaned up from the enemy array
@@ -202,8 +200,8 @@ impl event::EventHandler for MainState {
             text.set_font(font, graphics::PxScale::from(40.0));
 
             let top_left = Point2 {
-                x: (self.screen_width - text.width(ctx) as f32) / 2.0,
-                y: (self.screen_height - text.height(ctx) as f32) / 2.0,
+                x: (self.screen_width - text.width(ctx)) / 2.0,
+                y: (self.screen_height - text.height(ctx)) / 2.0,
             };
             graphics::draw(ctx, &text, graphics::DrawParam {
                 dest: top_left,
@@ -237,8 +235,8 @@ impl event::EventHandler for MainState {
 pub fn main() {
     let conf = Conf::new().
         window_mode(WindowMode {
-            min_width: 1024.0,
-            min_height: 768.0,
+            width: 800.0,
+            height: 600.0,
             ..Default::default()
         });
     let (mut ctx, event_loop) = ContextBuilder::new("shooter", "Andrew").
@@ -254,7 +252,7 @@ pub fn main() {
         filesystem::mount(&mut ctx, &path, true);
     }
 
-    let state = MainState::new(&mut ctx, conf).unwrap();
+    let state = MainState::new(&mut ctx, &conf).unwrap();
 
     event::run(ctx, event_loop, state);
 }

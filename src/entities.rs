@@ -36,7 +36,7 @@ impl Player {
         self.pos.x = nalgebra::clamp(new_pos, 0.0, max_right);
     }
 
-    pub fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
+    pub fn draw(&self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         match self.state {
             PlayerState::Normal => {
                 graphics::draw(ctx, &assets.ferris_normal_image, graphics::DrawParam {
@@ -124,9 +124,9 @@ impl Enemy {
 
     pub fn bounding_rect(&self, ctx: &mut Context) -> graphics::Rect {
         let left   = self.pos.x;
-        let right  = self.pos.x + self.sprite.width(ctx)  as f32;
+        let right  = self.pos.x + self.sprite.width(ctx);
         let top    = self.pos.y;
-        let bottom = self.pos.y + self.sprite.height(ctx) as f32;
+        let bottom = self.pos.y + self.sprite.height(ctx);
 
         graphics::Rect::new(left, top, right - left, bottom - top)
     }
