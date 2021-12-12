@@ -39,20 +39,18 @@ impl Player {
     pub fn draw(&self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         match self.state {
             PlayerState::Normal => {
-                graphics::draw(ctx, &assets.ferris_normal_image, graphics::DrawParam {
-                    dest: self.pos,
-                    scale: Vector2 { x: 0.95, y: 0.95 },
-                    offset: Point2 { x: 0.5, y: 1.0 },
-                    .. Default::default()
-                })?;
+                graphics::draw(ctx, &assets.ferris_normal_image, graphics::DrawParam::default().
+                    dest(self.pos).
+                    scale(Vector2 { x: 0.95, y: 0.95 }).
+                    offset(Point2 { x: 0.5, y: 1.0 })
+                )?;
             },
 
             PlayerState::Shooting => {
-                graphics::draw(ctx, &assets.ferris_shooting_image, graphics::DrawParam {
-                    dest: self.pos,
-                    offset: Point2 { x: 0.545, y: 0.96 },
-                    .. Default::default()
-                })?;
+                graphics::draw(ctx, &assets.ferris_shooting_image, graphics::DrawParam::default().
+                    dest(self.pos).
+                    offset(Point2 { x: 0.545, y: 0.96 })
+                )?;
             },
         }
 
@@ -82,10 +80,7 @@ impl Shot {
     }
 
     pub fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
-        graphics::draw(ctx, &assets.shot_image, graphics::DrawParam {
-            dest: self.pos,
-            .. Default::default()
-        })
+        graphics::draw(ctx, &assets.shot_image, graphics::DrawParam::default().dest(self.pos))
     }
 }
 

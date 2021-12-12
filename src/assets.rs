@@ -51,10 +51,7 @@ impl TextSprite {
 
 impl Sprite for TextSprite {
     fn draw(&mut self, top_left: Point2<f32>, ctx: &mut Context) -> GameResult<()> {
-        graphics::draw(ctx, &self.text, graphics::DrawParam {
-            dest: top_left,
-            .. Default::default()
-        })
+        graphics::draw(ctx, &self.text, graphics::DrawParam::default().dest(top_left))
     }
 
     fn width(&self, ctx: &mut Context) -> f32 { self.text.width(ctx) }
