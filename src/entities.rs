@@ -15,7 +15,6 @@ pub struct Player {
     pub state: PlayerState,
     pub pos: Point2<f32>,
     pub time_until_next_shot: f32,
-    velocity: Vector2<f32>,
 }
 
 impl Player {
@@ -26,7 +25,6 @@ impl Player {
         Player {
             state: PlayerState::Normal,
             pos,
-            velocity: Vector2 { x: 0.0, y: 0.0 },
             time_until_next_shot: Self::SHOT_TIMEOUT,
         }
     }
