@@ -37,18 +37,18 @@ impl Player {
     pub fn draw(&self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
         match self.state {
             PlayerState::Normal => {
-                graphics::draw(ctx, &assets.ferris_normal_image, graphics::DrawParam::default().
+                let draw_params = graphics::DrawParam::default().
                     dest(self.pos).
                     scale(Vector2 { x: 0.95, y: 0.95 }).
-                    offset(Point2 { x: 0.5, y: 1.0 })
-                )?;
+                    offset(Point2 { x: 0.5, y: 1.0 });
+                graphics::draw(ctx, &assets.ferris_normal_image, draw_params)?;
             },
 
             PlayerState::Shooting => {
-                graphics::draw(ctx, &assets.ferris_shooting_image, graphics::DrawParam::default().
+                let draw_params = graphics::DrawParam::default().
                     dest(self.pos).
-                    offset(Point2 { x: 0.545, y: 0.96 })
-                )?;
+                    offset(Point2 { x: 0.545, y: 0.96 });
+                graphics::draw(ctx, &assets.ferris_shooting_image, draw_params)?;
             },
         }
 
