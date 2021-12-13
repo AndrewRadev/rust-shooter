@@ -6,8 +6,8 @@ edition = "2021"
 
 [dependencies]
 ggez = "0.7.0"
-nalgebra = "0.23.2"
-rand = "0.8.0"
+nalgebra = "0.29.0"
+rand = "0.8.4"
 
 [dev-dependencies]
-quickcheck = "0.9.2"
+quickcheck = "1.0.3"
