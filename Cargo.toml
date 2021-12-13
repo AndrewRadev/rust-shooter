@@ -10,4 +10,4 @@ nalgebra = "0.29.0"
 rand = "0.8.4"
 
 [dev-dependencies]
-quickcheck = "1.0.3"
+quickcheck = "0.9.2"
