@@ -232,8 +232,8 @@ impl event::EventHandler for MainState {
 pub fn main() {
     let conf = Conf::new().
         window_mode(WindowMode {
-            width: 800.0,
-            height: 600.0,
+            width: 1200.0,
+            height: 1000.0,
             ..Default::default()
         });
     let (mut ctx, event_loop) = ContextBuilder::new("shooter", "Andrew").
