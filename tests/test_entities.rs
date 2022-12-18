@@ -41,8 +41,6 @@ fn prop_shots_fly_upwards(x: u32, y: u32) -> bool {
         y: (y as f32) / 1000.0,
     });
 
-    println!("{:?}", (x, y));
-
     let old_pos = shot.pos.clone();
     shot.update(10.0);
 
