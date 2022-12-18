@@ -96,7 +96,7 @@ impl event::EventHandler for MainState {
         const DESIRED_FPS: u32 = 60;
 
         while ctx.time.check_update_time(DESIRED_FPS) {
-            let seconds = 1.0 / (DESIRED_FPS as f32);
+            let seconds = ctx.time.delta().as_secs_f32();
 
             // Spawn enemies
             self.time_until_next_enemy -= seconds;
@@ -163,10 +163,7 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
-    fn key_down_event(&mut self,
-                      ctx: &mut Context,
-                      input: keyboard::KeyInput,
-                      _repeat: bool) -> GameResult<()> {
+    fn key_down_event(&mut self, ctx: &mut Context, input: keyboard::KeyInput, _repeat: bool) -> GameResult<()> {
         match input.keycode {
             Some(keyboard::KeyCode::Space) => self.input.fire = true,
             Some(keyboard::KeyCode::Left) => self.input.movement = -1.0,
@@ -178,9 +175,7 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
-    fn key_up_event(&mut self,
-                    _ctx: &mut Context,
-                    input: keyboard::KeyInput) -> GameResult<()> {
+    fn key_up_event(&mut self, _ctx: &mut Context, input: keyboard::KeyInput) -> GameResult<()> {
         match input.keycode {
             Some(keyboard::KeyCode::Space) => self.input.fire = false,
             Some(keyboard::KeyCode::Left | keyboard::KeyCode::Right) => {
