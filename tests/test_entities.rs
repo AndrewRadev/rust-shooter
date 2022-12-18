@@ -19,10 +19,10 @@ impl Sprite for MockSprite {
 }
 
 #[quickcheck]
-fn prop_enemies_fall_downwards(x: u16, y: u16) -> bool {
+fn prop_enemies_fall_downwards(x: f32) -> bool {
     let enemy_pos = Point2 {
-        x: x as f32,
-        y: y as f32,
+        x: if x.is_nan() { 0.0 } else { x },
+        y: 0.0,
     };
 
     let mock_sprite = Box::new(MockSprite { width: 100.0, height: 100.0 });
@@ -35,11 +35,13 @@ fn prop_enemies_fall_downwards(x: u16, y: u16) -> bool {
 }
 
 #[quickcheck]
-fn prop_shots_fly_upwards(x: u16, y: u16) -> bool {
+fn prop_shots_fly_upwards(x: u32, y: u32) -> bool {
     let mut shot = Shot::new(Point2 {
-        x: x as f32,
-        y: y as f32 + 200.0,
+        x: (x as f32) / 1000.0,
+        y: (y as f32) / 1000.0,
     });
+
+    println!("{:?}", (x, y));
 
     let old_pos = shot.pos.clone();
     shot.update(10.0);
