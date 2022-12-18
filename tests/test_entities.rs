@@ -1,6 +1,6 @@
 use ggez::mint::Point2;
 use ggez::{graphics, Context};
-use quickcheck::quickcheck;
+use quickcheck_macros::quickcheck;
 
 use shooter::entities::*;
 use shooter::assets::Sprite;
@@ -18,23 +18,31 @@ impl Sprite for MockSprite {
     fn height(&self, _ctx: &mut Context) -> f32 { self.height }
 }
 
-quickcheck! {
-    fn prop_enemies_fall_downwards(x: f32, y: f32) -> bool {
-        let mock_sprite = Box::new(MockSprite { width: 100.0, height: 100.0 });
-        let mut enemy = Enemy::new("test", Point2 { x, y }, 10.0, mock_sprite).unwrap();
+#[quickcheck]
+fn prop_enemies_fall_downwards(x: u16, y: u16) -> bool {
+    let enemy_pos = Point2 {
+        x: x as f32,
+        y: y as f32,
+    };
 
-        let old_pos = enemy.pos.clone();
-        enemy.update(10.0);
+    let mock_sprite = Box::new(MockSprite { width: 100.0, height: 100.0 });
+    let mut enemy = Enemy::new("test", enemy_pos, 10.0, mock_sprite).unwrap();
 
-        enemy.pos.x == old_pos.x && enemy.pos.y > old_pos.y
-    }
+    let old_pos = enemy.pos.clone();
+    enemy.update(10.0);
 
-    fn prop_shots_fly_upwards(x: f32, y: f32) -> bool {
-        let mut shot = Shot::new(Point2 { x, y });
+    enemy.pos.x == old_pos.x && enemy.pos.y > old_pos.y
+}
 
-        let old_pos = shot.pos.clone();
-        shot.update(10.0);
+#[quickcheck]
+fn prop_shots_fly_upwards(x: u16, y: u16) -> bool {
+    let mut shot = Shot::new(Point2 {
+        x: x as f32,
+        y: y as f32 + 200.0,
+    });
 
-        shot.pos.x == old_pos.x && shot.pos.y < old_pos.y
-    }
+    let old_pos = shot.pos.clone();
+    shot.update(10.0);
+
+    shot.pos.x == old_pos.x && shot.pos.y < old_pos.y
 }
