@@ -5,8 +5,8 @@ authors = ["Andrew"]
 edition = "2021"
 
 [dependencies]
-ggez = "0.7.0"
-nalgebra = "0.29.0"
+ggez = "0.8.1"
+nalgebra = "0.31.4"
 rand = "0.8.4"
 
 [dev-dependencies]

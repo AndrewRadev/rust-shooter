@@ -1,11 +1,9 @@
 use ggez::audio::SoundSource;
 use ggez::conf::{Conf, WindowMode};
 use ggez::event;
-use ggez::filesystem;
-use ggez::graphics;
-use ggez::input;
+use ggez::graphics::{self, Drawable};
+use ggez::input::keyboard;
 use ggez::mint::Point2;
-use ggez::timer;
 use ggez::{Context, ContextBuilder, GameResult};
 use rand::Rng;
 use rand::rngs::ThreadRng;
@@ -97,7 +95,7 @@ impl event::EventHandler for MainState {
 
         const DESIRED_FPS: u32 = 60;
 
-        while timer::check_update_time(ctx, DESIRED_FPS) {
+        while ctx.time.check_update_time(DESIRED_FPS) {
             let seconds = 1.0 / (DESIRED_FPS as f32);
 
             // Spawn enemies
@@ -110,7 +108,7 @@ impl event::EventHandler for MainState {
                 let random_text = Self::ENEMIES[self.rng.gen_range(0 .. Self::ENEMIES.len())];
                 let random_speed = self.rng.gen_range(50.0 .. 200.0);
 
-                let enemy_sprite = Box::new(TextSprite::new(random_text, ctx)?);
+                let enemy_sprite = Box::new(TextSprite::new(random_text)?);
                 let enemy = Enemy::new(random_text, random_point, random_speed, enemy_sprite)?;
 
                 self.enemies.push(enemy);
@@ -167,64 +165,68 @@ impl event::EventHandler for MainState {
 
     fn key_down_event(&mut self,
                       ctx: &mut Context,
-                      keycode: event::KeyCode,
-                      _keymod: input::keyboard::KeyMods,
-                      _repeat: bool) {
-        match keycode {
-            event::KeyCode::Space => self.input.fire = true,
-            event::KeyCode::Left => self.input.movement = -1.0,
-            event::KeyCode::Right => self.input.movement = 1.0,
-            event::KeyCode::Escape => event::quit(ctx),
+                      input: keyboard::KeyInput,
+                      _repeat: bool) -> GameResult<()> {
+        match input.keycode {
+            Some(keyboard::KeyCode::Space) => self.input.fire = true,
+            Some(keyboard::KeyCode::Left) => self.input.movement = -1.0,
+            Some(keyboard::KeyCode::Right) => self.input.movement = 1.0,
+            Some(keyboard::KeyCode::Escape) => ctx.request_quit(),
             _ => (), // Do nothing
         }
+
+        Ok(())
     }
 
     fn key_up_event(&mut self,
                     _ctx: &mut Context,
-                    keycode: event::KeyCode,
-                    _keymod: input::keyboard::KeyMods) {
-        match keycode {
-            event::KeyCode::Space => self.input.fire = false,
-            event::KeyCode::Left | event::KeyCode::Right => self.input.movement = 0.0,
+                    input: keyboard::KeyInput) -> GameResult<()> {
+        match input.keycode {
+            Some(keyboard::KeyCode::Space) => self.input.fire = false,
+            Some(keyboard::KeyCode::Left | keyboard::KeyCode::Right) => {
+                self.input.movement = 0.0
+            },
             _ => (), // Do nothing
         }
+
+        Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         let dark_blue = graphics::Color::from_rgb(26, 51, 77);
-        graphics::clear(ctx, dark_blue);
+        let mut canvas = graphics::Canvas::from_frame(ctx, dark_blue);
 
         if self.game_over {
-            let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
             let mut text = graphics::Text::new(format!("Killed by {}.\nScore: {}", self.killed_by, self.score));
-            text.set_font(font, graphics::PxScale::from(40.0));
+            text.set_font("MainFont");
+            text.set_scale(graphics::PxScale::from(40.0));
 
             let top_left = Point2 {
-                x: (self.screen_width - text.width(ctx)) / 2.0,
-                y: (self.screen_height - text.height(ctx)) / 2.0,
+                x: (self.screen_width - text.dimensions(ctx).unwrap().w) / 2.0,
+                y: (self.screen_height - text.dimensions(ctx).unwrap().h) / 2.0,
             };
-            graphics::draw(ctx, &text, graphics::DrawParam::default().dest(top_left))?;
-            graphics::present(ctx)?;
+            canvas.draw(&text, graphics::DrawParam::default().dest(top_left));
+            canvas.finish(ctx)?;
             return Ok(())
         }
 
-        self.player.draw(ctx, &self.assets)?;
+        self.player.draw(&mut canvas, &self.assets);
 
         for shot in self.shots.iter_mut() {
-            shot.draw(ctx, &self.assets)?;
+            shot.draw(&mut canvas, &self.assets);
         }
 
         for enemy in self.enemies.iter_mut() {
-            enemy.draw(ctx)?;
+            enemy.draw(&mut canvas);
         }
 
         if debug::is_active() {
             for enemy in &mut self.enemies {
-                debug::draw_outline(enemy.bounding_rect(ctx), ctx).unwrap();
+                debug::draw_outline(enemy.bounding_rect(ctx), &mut canvas, ctx).unwrap();
             }
         }
 
-        graphics::present(ctx)?;
+        canvas.finish(ctx)?;
         Ok(())
     }
 }
@@ -246,8 +248,11 @@ pub fn main() {
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
         let mut path = path::PathBuf::from(manifest_dir);
         path.push("resources");
-        filesystem::mount(&mut ctx, &path, true);
+        ctx.fs.mount(&path, true);
     }
+
+    let font_data = graphics::FontData::from_path(&ctx, "/DejaVuSerif.ttf").unwrap();
+    ctx.gfx.add_font("MainFont", font_data);
 
     let state = MainState::new(&mut ctx, &conf).unwrap();
 

@@ -1,5 +1,5 @@
 use ggez::mint::Point2;
-use ggez::{Context, GameResult};
+use ggez::{graphics, Context};
 use quickcheck::quickcheck;
 
 use shooter::entities::*;
@@ -12,7 +12,7 @@ struct MockSprite {
 }
 
 impl Sprite for MockSprite {
-    fn draw(&mut self, _center: Point2<f32>, _ctx: &mut Context) -> GameResult<()> { Ok(()) }
+    fn draw(&mut self, _center: Point2<f32>, _canvas: &mut graphics::Canvas) {}
 
     fn width(&self, _ctx: &mut Context) -> f32 { self.width }
     fn height(&self, _ctx: &mut Context) -> f32 { self.height }

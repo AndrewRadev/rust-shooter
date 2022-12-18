@@ -34,29 +34,27 @@ impl Player {
         self.pos.x = nalgebra::clamp(new_pos, 0.0, max_right);
     }
 
-    pub fn draw(&self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
+    pub fn draw(&self, canvas: &mut graphics::Canvas, assets: &Assets) {
         match self.state {
             PlayerState::Normal => {
                 let draw_params = graphics::DrawParam::default().
                     dest(self.pos).
                     scale(Vector2 { x: 0.95, y: 0.95 }).
                     offset(Point2 { x: 0.5, y: 1.0 });
-                graphics::draw(ctx, &assets.ferris_normal_image, draw_params)?;
+                canvas.draw(&assets.ferris_normal_image, draw_params);
             },
 
             PlayerState::Shooting => {
                 let draw_params = graphics::DrawParam::default().
                     dest(self.pos).
                     offset(Point2 { x: 0.545, y: 0.96 });
-                graphics::draw(ctx, &assets.ferris_shooting_image, draw_params)?;
+                canvas.draw(&assets.ferris_shooting_image, draw_params);
             },
         }
-
-        Ok(())
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Shot {
     pub pos: Point2<f32>,
     pub is_alive: bool,
@@ -77,8 +75,8 @@ impl Shot {
         self.pos.y += self.velocity.y * seconds;
     }
 
-    pub fn draw(&mut self, ctx: &mut Context, assets: &Assets) -> GameResult<()> {
-        graphics::draw(ctx, &assets.shot_image, graphics::DrawParam::default().dest(self.pos))
+    pub fn draw(&mut self, canvas: &mut graphics::Canvas, assets: &Assets) {
+        canvas.draw(&assets.shot_image, graphics::DrawParam::default().dest(self.pos));
     }
 }
 
@@ -111,8 +109,8 @@ impl Enemy {
         self.pos.y += self.velocity.y * seconds;
     }
 
-    pub fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        self.sprite.draw(self.pos, ctx)
+    pub fn draw(&mut self, canvas: &mut graphics::Canvas) {
+        self.sprite.draw(self.pos, canvas);
     }
 
     pub fn bounding_rect(&self, ctx: &mut Context) -> graphics::Rect {

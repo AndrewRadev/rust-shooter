@@ -1,5 +1,5 @@
 use ggez::audio;
-use ggez::graphics;
+use ggez::graphics::{self, Drawable};
 use ggez::mint::Point2;
 use ggez::{Context, GameResult};
 use std::fmt::Debug;
@@ -15,9 +15,9 @@ pub struct Assets {
 
 impl Assets {
     pub fn new(ctx: &mut Context) -> GameResult<Assets> {
-        let ferris_normal_image   = graphics::Image::new(ctx, "/ferris-normal.png")?;
-        let ferris_shooting_image = graphics::Image::new(ctx, "/ferris-shooting.png")?;
-        let shot_image            = graphics::Image::new(ctx, "/shot.png")?;
+        let ferris_normal_image   = graphics::Image::from_path(ctx, "/ferris-normal.png")?;
+        let ferris_shooting_image = graphics::Image::from_path(ctx, "/ferris-shooting.png")?;
+        let shot_image            = graphics::Image::from_path(ctx, "/shot.png")?;
 
         let shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
         let boom_sound = audio::Source::new(ctx, "/boom.ogg")?;
@@ -30,7 +30,7 @@ impl Assets {
 }
 
 pub trait Sprite: Debug {
-    fn draw(&mut self, center: Point2<f32>, ctx: &mut Context) -> GameResult<()>;
+    fn draw(&mut self, center: Point2<f32>, canvas: &mut graphics::Canvas);
     fn width(&self, ctx: &mut Context) -> f32;
     fn height(&self, ctx: &mut Context) -> f32;
 }
@@ -41,19 +41,21 @@ pub struct TextSprite {
 }
 
 impl TextSprite {
-    pub fn new(label: &str, ctx: &mut Context) -> GameResult<TextSprite> {
-        let font = graphics::Font::new(ctx, "/DejaVuSerif.ttf")?;
+    pub fn new(label: &str) -> GameResult<TextSprite> {
         let mut text = graphics::Text::new(label);
-        text.set_font(font, graphics::PxScale::from(26.0));
+
+        text.set_font("MainFont");
+        text.set_scale(graphics::PxScale::from(26.0));
+
         Ok(TextSprite { text })
     }
 }
 
 impl Sprite for TextSprite {
-    fn draw(&mut self, top_left: Point2<f32>, ctx: &mut Context) -> GameResult<()> {
-        graphics::draw(ctx, &self.text, graphics::DrawParam::default().dest(top_left))
+    fn draw(&mut self, top_left: Point2<f32>, canvas: &mut graphics::Canvas) {
+        canvas.draw(&self.text, graphics::DrawParam::default().dest(top_left))
     }
 
-    fn width(&self, ctx: &mut Context) -> f32 { self.text.width(ctx) }
-    fn height(&self, ctx: &mut Context) -> f32 { self.text.height(ctx) }
+    fn width(&self, ctx: &mut Context) -> f32 { self.text.dimensions(ctx).unwrap().w }
+    fn height(&self, ctx: &mut Context) -> f32 { self.text.dimensions(ctx).unwrap().h }
 }
