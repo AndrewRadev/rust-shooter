@@ -1,4 +1,4 @@
-use ggez::audio;
+use ggez::audio::{self, SoundSource};
 use ggez::graphics::{self, Drawable};
 use ggez::mint::Point2;
 use ggez::{Context, GameResult};
@@ -19,8 +19,11 @@ impl Assets {
         let ferris_shooting_image = graphics::Image::from_path(ctx, "/ferris-shooting.png")?;
         let shot_image            = graphics::Image::from_path(ctx, "/shot.png")?;
 
-        let shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
-        let boom_sound = audio::Source::new(ctx, "/boom.ogg")?;
+        let mut shot_sound = audio::Source::new(ctx, "/pew.ogg")?;
+        shot_sound.set_volume(0.5);
+
+        let mut boom_sound = audio::Source::new(ctx, "/boom.ogg")?;
+        boom_sound.set_volume(0.3);
 
         Ok(Assets {
             ferris_normal_image, ferris_shooting_image, shot_image,
@@ -45,7 +48,7 @@ impl TextSprite {
         let mut text = graphics::Text::new(label);
 
         text.set_font("MainFont");
-        text.set_scale(graphics::PxScale::from(26.0));
+        text.set_scale(graphics::PxScale::from(32.0));
 
         Ok(TextSprite { text })
     }
