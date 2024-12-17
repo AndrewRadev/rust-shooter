@@ -17,8 +17,18 @@ use std::path;
 
 #[derive(Debug, Default)]
 struct InputState {
-    movement: f32,
+    move_left: bool,
+    move_right: bool,
     fire: bool,
+}
+
+impl InputState {
+    fn move_amount(&self) -> f32 {
+        let mut amount = 0.0;
+        if self.move_left { amount += -1.0; }
+        if self.move_right { amount += 1.0; }
+        amount
+    }
 }
 
 struct MainState {
@@ -98,6 +108,11 @@ impl event::EventHandler for MainState {
         while ctx.time.check_update_time(DESIRED_TICKS_PER_SEC) {
             let seconds = 1.0 / DESIRED_TICKS_PER_SEC as f32;
 
+            // Input
+            // Need both checks if key was pressed for less than one frame
+            self.input.fire = ctx.keyboard.is_key_pressed(keyboard::KeyCode::Space) ||
+                ctx.keyboard.is_key_just_pressed(keyboard::KeyCode::Space);
+
             // Spawn enemies
             self.time_until_next_enemy -= seconds;
             if self.time_until_next_enemy <= 0.0 {
@@ -116,7 +131,7 @@ impl event::EventHandler for MainState {
             }
 
             // Update player state
-            self.player.update(self.input.movement, seconds, self.screen_width);
+            self.player.update(self.input.move_amount(), seconds, self.screen_width);
             self.player.time_until_next_shot -= seconds;
             if self.input.fire && self.player.time_until_next_shot < 0.0 {
                 let shot_pos = Point2 {
@@ -163,15 +178,10 @@ impl event::EventHandler for MainState {
         Ok(())
     }
 
-    fn key_down_event(&mut self, ctx: &mut Context, input: keyboard::KeyInput, repeat: bool) -> GameResult<()> {
-        if repeat {
-            return Ok(());
-        }
-
+    fn key_down_event(&mut self, ctx: &mut Context, input: keyboard::KeyInput, _repeat: bool) -> GameResult<()> {
         match input.keycode {
-            Some(keyboard::KeyCode::Space) => self.input.fire = true,
-            Some(keyboard::KeyCode::Left) => self.input.movement = -1.0,
-            Some(keyboard::KeyCode::Right) => self.input.movement = 1.0,
+            Some(keyboard::KeyCode::Left) => self.input.move_left = true,
+            Some(keyboard::KeyCode::Right) => self.input.move_right = true,
             Some(keyboard::KeyCode::Escape) => ctx.request_quit(),
             _ => (), // Do nothing
         }
@@ -181,10 +191,8 @@ impl event::EventHandler for MainState {
 
     fn key_up_event(&mut self, _ctx: &mut Context, input: keyboard::KeyInput) -> GameResult<()> {
         match input.keycode {
-            Some(keyboard::KeyCode::Space) => self.input.fire = false,
-            Some(keyboard::KeyCode::Left | keyboard::KeyCode::Right) => {
-                self.input.movement = 0.0
-            },
+            Some(keyboard::KeyCode::Left) => self.input.move_left = false,
+            Some(keyboard::KeyCode::Right) => self.input.move_right = false,
             _ => (), // Do nothing
         }
 
