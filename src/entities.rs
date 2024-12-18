@@ -31,7 +31,7 @@ impl Player {
 
     pub fn update(&mut self, amount: f32, seconds: f32, max_right: f32) {
         let new_pos = self.pos.x + Self::SPEED * seconds * amount;
-        self.pos.x = nalgebra::clamp(new_pos, 0.0, max_right);
+        self.pos.x = f32::clamp(new_pos, 0.0, max_right);
     }
 
     pub fn draw(&self, canvas: &mut graphics::Canvas, assets: &Assets) {
